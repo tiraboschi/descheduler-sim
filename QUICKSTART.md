@@ -12,8 +12,8 @@ pip install -r requirements.txt
 # 3. Test the setup
 ./test-closed-loop.sh
 
-# 4. Run closed-loop simulation
-python cli_prometheus.py
+# 4. Watch the descheduler in action
+kubectl logs -n kube-descheduler deployment/descheduler -f
 ```
 
 ## What You Get
@@ -21,92 +21,99 @@ python cli_prometheus.py
 A complete closed-loop testing environment with:
 - **5 KWOK nodes** (fake Kubernetes nodes)
 - **VirtualMachine CRD** (KubeVirt-like VM resources)
-- **Prometheus** with recording rules
-- **Synthetic metrics exporter** with dynamic feedback
-- **Node classifier simulator** integrated with Prometheus
+- **Prometheus** with recording rules for 19 algorithms
+- **Kubernetes Descheduler** with Prometheus integration
+- **Eviction Webhook** for VM migration on pod eviction
+- **Synthetic metrics exporter** that reads pod annotations
 
 ## Architecture Flow
 
 ```
-1. Metrics Exporter generates synthetic node metrics
+1. Metrics Exporter reads pod annotations and calculates node metrics
    ↓
 2. Prometheus scrapes metrics every 15s
    ↓
-3. Simulator queries Prometheus for current state
+3. Prometheus recording rules calculate algorithm scores
    ↓
-4. Simulator classifies nodes and decides VM migrations
+4. Descheduler queries Prometheus for node scores
    ↓
-5. Simulator sends migration feedback to exporter
+5. Descheduler evicts pods from overutilized nodes
    ↓
-6. Exporter updates internal state and metrics
+6. Eviction Webhook intercepts evictions and triggers VM migrations
    ↓
-7. Go to step 2 (closed loop!)
+7. VM Controller deletes old pod and creates new pod
+   ↓
+8. Kubernetes Scheduler places new pod on available node
+   ↓
+9. Metrics Exporter recalculates metrics from new pod locations
+   ↓
+10. Go to step 2 (closed loop!)
 ```
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `prometheus_exporter.py` | Flask app exposing metrics + feedback API |
-| `prometheus_loader.py` | Queries Prometheus, returns Node objects |
-| `prometheus_feedback.py` | Sends VM migrations to exporter |
-| `cli_prometheus.py` | Closed-loop simulation orchestrator |
+| `prometheus_exporter.py` | Flask app exposing node metrics from pod annotations |
+| `eviction_webhook.py` | Intercepts pod evictions from descheduler |
+| `vm_controller.py` | Manages VirtualMachine CR lifecycle |
+| `pod_manager.py` | Manages virt-launcher pod lifecycle |
 | `setup-kind-env.sh` | Automated KIND cluster setup |
 | `test-closed-loop.sh` | Test suite |
 
 ## Usage Examples
 
-### List Available Algorithms
+### Monitor Descheduler
 
 ```bash
-python cli_prometheus.py --list-algorithms
+# Follow descheduler logs
+kubectl logs -n kube-descheduler deployment/descheduler -f
+
+# View recent evictions
+kubectl logs -n kube-descheduler deployment/descheduler | grep -i evict
 ```
 
-### Run with Specific Algorithm
+### Watch VM Migrations
 
 ```bash
-python cli_prometheus.py --algorithm "Ideal Point Positive Distance"
+# Watch VirtualMachine status changes
+kubectl get vm -w
+
+# Watch pod status
+kubectl get pods -w
+
+# View all VMs with their current nodes
+kubectl get vm -o wide
 ```
 
-### Use Recording Rules
+### Switch Algorithms
 
+Edit `k8s/descheduler-policy.yaml` and change the Prometheus query:
+
+```yaml
+metricsUtilization:
+  prometheus:
+    # Change this to use a different algorithm
+    query: descheduler:node:euclidean_distance:avg1m
+  source: Prometheus
+```
+
+Then apply:
 ```bash
-python cli_prometheus.py --recording-rules
+kubectl apply -f k8s/descheduler-policy.yaml
+kubectl rollout restart -n kube-descheduler deployment/descheduler
 ```
 
-### Run Long Simulation
+### Available Algorithms
 
-```bash
-python cli_prometheus.py --max-steps 20 --step-delay 10
-```
+All algorithms are available as Prometheus recording rules:
+- `descheduler:node:weighted_average:avg1m`
+- `descheduler:node:euclidean_distance:avg1m`
+- `descheduler:node:ideal_point_positive_distance:avg1m`
+- `descheduler:node:linear_amplified_ippd_k3:avg1m`
+- And 15 more...
 
-### Load Custom Scenario
-
-```bash
-# Create scenario JSON
-cat > my-scenario.json <<EOF
-{
-  "nodes": [
-    {
-      "name": "kwok-node-1",
-      "cpu_usage": 0.9,
-      "cpu_pressure": 0.4,
-      "memory_usage": 0.8,
-      "memory_pressure": 0.3,
-      "vms": []
-    }
-  ]
-}
-EOF
-
-# Load it
-curl -X POST http://localhost:8000/scenario \
-  -H "Content-Type: application/json" \
-  -d @my-scenario.json
-
-# Run simulation
-python cli_prometheus.py
-```
+See [PROMETHEUS_ALGORITHMS.md](PROMETHEUS_ALGORITHMS.md) for the complete list.
 
 ## Accessing Services
 
@@ -221,7 +228,10 @@ kind delete cluster --name node-classifier-sim
 
 ## Full Documentation
 
-- [README_PROMETHEUS.md](README_PROMETHEUS.md) - Complete Prometheus integration guide
+- [README.md](README.md) - Complete Prometheus integration guide
 - [PROMETHEUS_ALGORITHMS.md](PROMETHEUS_ALGORITHMS.md) - Algorithm implementation in PromQL
 - [PODMAN_SETUP.md](PODMAN_SETUP.md) - Podman-specific setup
-- [README.md](README.md) - Local simulator (GUI) documentation
+- [README_PODS.md](README_PODS.md) - Pod-based VM simulation with KWOK
+- [README_VM_CRD.md](README_VM_CRD.md) - VirtualMachine Custom Resource Definition
+- [RESOURCE_MODEL.md](RESOURCE_MODEL.md) - Resource model documentation
+- [SCHEDULER_INTEGRATION.md](SCHEDULER_INTEGRATION.md) - Scheduler integration guide

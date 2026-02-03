@@ -118,18 +118,25 @@ else
     fi
 fi
 
-# Test 4: Load nodes from Prometheus
-info "Test 4: Loading nodes from Prometheus..."
+# Test 4: Check descheduler is running
+info "Test 4: Checking descheduler deployment..."
 
-python prometheus_loader.py --url http://localhost:9090 > /tmp/prom-loader-test.log 2>&1
+DESCHEDULER_READY=$(kubectl get deployment -n kube-descheduler descheduler -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo 0)
 
-if [ $? -eq 0 ]; then
-    NODE_COUNT=$(grep -c "kwok-node" /tmp/prom-loader-test.log || echo 0)
-    info "✓ Successfully loaded $NODE_COUNT nodes"
+if [ "$DESCHEDULER_READY" -gt "0" ]; then
+    info "✓ Descheduler is running ($DESCHEDULER_READY replicas ready)"
 else
-    error "Failed to load nodes from Prometheus"
-    cat /tmp/prom-loader-test.log
-    exit 1
+    warn "Descheduler not ready yet, waiting 30s..."
+    sleep 30
+    DESCHEDULER_READY=$(kubectl get deployment -n kube-descheduler descheduler -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo 0)
+
+    if [ "$DESCHEDULER_READY" -gt "0" ]; then
+        info "✓ Descheduler is now running"
+    else
+        error "Descheduler is not running"
+        kubectl get pods -n kube-descheduler
+        exit 1
+    fi
 fi
 
 # Test 5: Test feedback endpoint
@@ -161,22 +168,26 @@ else
     warn "No recording rules found"
 fi
 
-# Test 7: Run a short simulation
-info "Test 7: Running short closed-loop simulation (3 steps)..."
+# Test 7: Check for VMs and VM controller
+info "Test 7: Checking VirtualMachines and VM controller..."
 
-python cli_prometheus.py \
-  --prometheus http://localhost:9090 \
-  --exporter http://localhost:8000 \
-  --algorithm "Ideal Point Positive Distance" \
-  --max-steps 3 \
-  > /tmp/simulation-test.log 2>&1
+VM_COUNT=$(kubectl get vm 2>/dev/null | grep -c "^vm-" || echo 0)
+info "Found $VM_COUNT VirtualMachines"
 
-if [ $? -eq 0 ]; then
-    MIGRATIONS=$(grep -c "Moved VM" /tmp/simulation-test.log || echo 0)
-    info "✓ Simulation completed successfully ($MIGRATIONS VM migrations)"
+VM_CONTROLLER_READY=$(kubectl get pods -l app=vm-controller -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
+
+if [ "$VM_CONTROLLER_READY" = "Running" ]; then
+    info "✓ VM Controller is running"
 else
-    warn "Simulation encountered issues (this might be OK if cluster is balanced)"
-    tail -20 /tmp/simulation-test.log
+    warn "VM Controller not running yet (phase: $VM_CONTROLLER_READY)"
+fi
+
+EVICTION_WEBHOOK_READY=$(kubectl get pods -l app=eviction-webhook -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
+
+if [ "$EVICTION_WEBHOOK_READY" = "Running" ]; then
+    info "✓ Eviction Webhook is running"
+else
+    warn "Eviction Webhook not running yet (phase: $EVICTION_WEBHOOK_READY)"
 fi
 
 # Summary
@@ -186,13 +197,13 @@ echo "Test Summary"
 echo "========================================"
 info "All critical tests passed!"
 echo ""
-info "You can now run the full simulation:"
-echo "  python cli_prometheus.py --max-steps 10"
+info "Monitor the descheduler:"
+echo "  kubectl logs -n kube-descheduler deployment/descheduler -f"
 echo ""
-info "Or list available algorithms:"
-echo "  python cli_prometheus.py --list-algorithms"
+info "Watch VM migrations:"
+echo "  kubectl get vm -w"
 echo ""
-info "Monitor Prometheus:"
+info "View Prometheus:"
 echo "  http://localhost:9090"
 echo ""
 info "View metrics:"

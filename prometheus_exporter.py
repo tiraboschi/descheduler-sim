@@ -18,8 +18,7 @@ import time
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from node import Node, VM
-from scenario_loader import ScenarioLoader
+from node import Node, VM, calculate_pressure_from_utilization
 
 # Configure logging
 logging.basicConfig(
@@ -198,13 +197,13 @@ class ExporterState:
 
             # Calculate pressure using the same logic as Node.update_metrics_from_vms()
             if total_cpu <= 1.0:
-                cpu_pressure = ScenarioLoader.calculate_pressure_from_utilization(total_cpu)
+                cpu_pressure = calculate_pressure_from_utilization(total_cpu)
             else:
-                base_pressure = ScenarioLoader.calculate_pressure_from_utilization(1.0)
+                base_pressure = calculate_pressure_from_utilization(1.0)
                 overload_factor = total_cpu - 1.0
                 cpu_pressure = min(1.0, base_pressure + overload_factor * 0.5)
 
-            memory_pressure = ScenarioLoader.calculate_pressure_from_utilization(memory_usage)
+            memory_pressure = calculate_pressure_from_utilization(memory_usage)
 
             return {
                 "cpu_usage": cpu_usage,
@@ -532,46 +531,14 @@ def get_node(node_name: str):
     return jsonify(node.to_dict())
 
 
-def initialize_from_file(scenario_file: str):
-    """Initialize the exporter with a scenario from a file."""
-    try:
-        logger.info(f"Loading initial scenario from {scenario_file}")
-        loader = ScenarioLoader(scenario_file)
-
-        # Get the first available scenario
-        scenarios = loader.list_scenarios()
-        if not scenarios:
-            logger.warning("No scenarios found in file, starting empty")
-            return
-
-        scenario_name = scenarios[0]
-        nodes = loader.load_scenario(scenario_name)
-        state.load_scenario(nodes)
-
-        logger.info(f"Initialized with scenario '{scenario_name}' ({len(nodes)} nodes)")
-
-    except Exception as e:
-        logger.error(f"Error initializing from file: {e}", exc_info=True)
-
-
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='Prometheus Metrics Exporter (Read-Only)')
     parser.add_argument('--port', type=int, default=8000, help='Port to listen on')
     parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to bind to')
-    parser.add_argument('--scenario', type=str, default='sample_scenarios.json',
-                        help='Initial scenario file to load (optional, for fallback metrics)')
 
     args = parser.parse_args()
-
-    # Initialize with scenario if provided (optional - only for fallback metrics)
-    if args.scenario:
-        try:
-            initialize_from_file(args.scenario)
-        except Exception as e:
-            logger.warning(f"Could not load scenario file: {e}")
-            logger.warning("Continuing without scenario - will read metrics from pods only")
 
     logger.info("=" * 60)
     logger.info("Prometheus Metrics Exporter - READ-ONLY MODE")

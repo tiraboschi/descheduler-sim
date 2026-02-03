@@ -3,6 +3,33 @@ from typing import Dict, Any, List
 import json
 
 
+def calculate_pressure_from_utilization(utilization: float) -> float:
+    """
+    Calculate realistic pressure based on utilization.
+
+    Rules:
+    - Under 70% utilization: pressure is almost 0 (0-5%)
+    - 70-90% utilization: pressure grows moderately
+    - 90-100% utilization: pressure grows exponentially (approaching saturation)
+
+    This reflects reality: as resources approach limits, pressure increases dramatically.
+    """
+    if utilization < 0.7:
+        # Low utilization: minimal pressure (0-5%)
+        return min(0.05, utilization * 0.07)
+    elif utilization < 0.9:
+        # Moderate utilization: linear growth from ~0 to ~0.20
+        # At 70%: ~0.0, At 90%: ~0.20
+        pressure_factor = (utilization - 0.7) / 0.2  # 0 to 1 for 70% to 90%
+        return pressure_factor * 0.20
+    else:
+        # High utilization (90-100%): exponential growth from 0.20 to 0.80
+        # Use quadratic/exponential curve to show pressure rising sharply
+        pressure_factor = (utilization - 0.9) / 0.1  # 0 to 1 for 90% to 100%
+        # Quadratic growth: pressure rises sharply as we approach 100%
+        return 0.20 + (pressure_factor ** 2) * 0.60  # 0.20 at 90%, up to 0.80 at 100%
+
+
 @dataclass
 class VM:
     """Represents a Virtual Machine with its resource allocation and utilization."""
@@ -182,22 +209,21 @@ class Node:
         # Update pressure based on actual demand/utilization
         # CPU pressure uses the actual demand (can exceed 1.0) to show overload
         # This reflects VMs slowing down when demand > capacity
-        from scenario_loader import ScenarioLoader
-
+        
         # For CPU: if demand > 1.0, pressure should be very high
         # Scale pressure: at 1.0 demand = normal pressure, >1.0 = increased pressure
         if cpu_demand <= 1.0:
-            self.cpu_pressure = ScenarioLoader.calculate_pressure_from_utilization(cpu_demand)
+            self.cpu_pressure = calculate_pressure_from_utilization(cpu_demand)
         else:
             # When overloaded (demand > 100%), pressure increases sharply
             # Base pressure at 100% + additional pressure for overload
-            base_pressure = ScenarioLoader.calculate_pressure_from_utilization(1.0)
+            base_pressure = calculate_pressure_from_utilization(1.0)
             # Scale additional pressure: 110% demand = more pressure than 100%
             overload_factor = cpu_demand - 1.0  # How much over 100%
             # Additional pressure grows with overload (capped at 1.0 total)
             self.cpu_pressure = min(1.0, base_pressure + overload_factor * 0.5)
 
-        self.memory_pressure = ScenarioLoader.calculate_pressure_from_utilization(self.memory_usage)
+        self.memory_pressure = calculate_pressure_from_utilization(self.memory_usage)
 
     def sync_vms_to_utilization(self, target_cpu: float, target_mem: float,
                                 vm_cpu_max: float = 0.06, vm_mem_max: float = 0.04,
