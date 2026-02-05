@@ -1,0 +1,239 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: simulationscenarios.simulation.node-classifier.io
+spec:
+  group: simulation.node-classifier.io
+  names:
+    kind: SimulationScenario
+    listKind: SimulationScenarioList
+    plural: simulationscenarios
+    singular: simulationscenario
+    shortNames:
+      - scenario
+      - scenarios
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: [duration]
+              properties:
+                duration:
+                  type: string
+                  description: "Total simulation duration (e.g., 24h, 7d)"
+                timeScale:
+                  type: number
+                  description: "Schedule playback speed (1.0=real-time, 60.0=60x faster). Only affects scenario event generation, not Prometheus/descheduler timing."
+                  default: 1.0
+                vmPools:
+                  type: object
+                  description: "Named groups of VMs for selection"
+                  additionalProperties:
+                    type: object
+                    properties:
+                      selector:
+                        type: object
+                        properties:
+                          matchLabels:
+                            type: object
+                            additionalProperties:
+                              type: string
+                      vms:
+                        type: array
+                        items:
+                          type: string
+                profiles:
+                  type: object
+                  description: "Reusable utilization profiles"
+                  additionalProperties:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum: [periodic, constant, conditional]
+                      period:
+                        type: string
+                      pattern:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            time:
+                              type: string
+                            cpu:
+                              type: number
+                            memory:
+                              type: number
+                      cpu:
+                        type: number
+                      memory:
+                        type: number
+                      condition:
+                        type: object
+                        properties:
+                          dayOfWeek:
+                            type: array
+                            items:
+                              type: integer
+                              minimum: 1
+                              maximum: 7
+                taskTypes:
+                  type: object
+                  description: "Task definitions with resource consumption"
+                  additionalProperties:
+                    type: object
+                    properties:
+                      resources:
+                        type: object
+                        properties:
+                          cpu:
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          memory:
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                      duration:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                nodeSelectors:
+                  type: object
+                  description: "Named node selection strategies"
+                  additionalProperties:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                vmSelectors:
+                  type: object
+                  description: "Combined node+VM selection strategies"
+                  additionalProperties:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                vms:
+                  type: array
+                  description: "Initial VM definitions"
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      node:
+                        type: string
+                      resources:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                      labels:
+                        type: object
+                        additionalProperties:
+                          type: string
+                      baseProfile:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      initialUtilization:
+                        type: object
+                        properties:
+                          cpu:
+                            type: number
+                          memory:
+                            type: number
+                timeline:
+                  type: array
+                  description: "Scheduled events at specific times"
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                taskGenerators:
+                  type: array
+                  description: "Stochastic task generators"
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                conditionalEvents:
+                  type: array
+                  description: "Events triggered by conditions"
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                globalEvents:
+                  type: array
+                  description: "Scenario-wide events"
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                nodeSelectionStrategies:
+                  type: object
+                  description: "Advanced node selection strategies"
+                  additionalProperties:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Running, Paused, Completed, Failed]
+                startTime:
+                  type: string
+                  format: date-time
+                endTime:
+                  type: string
+                  format: date-time
+                currentSimulatedTime:
+                  type: string
+                elapsedRealTime:
+                  type: string
+                elapsedSimulatedTime:
+                  type: string
+                activeTaskGenerators:
+                  type: integer
+                totalTasksGenerated:
+                  type: integer
+                activeEvents:
+                  type: array
+                  items:
+                    type: string
+                message:
+                  type: string
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      message:
+                        type: string
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Duration
+          type: string
+          jsonPath: .spec.duration
+        - name: TimeScale
+          type: number
+          jsonPath: .spec.timeScale
+        - name: SimTime
+          type: string
+          jsonPath: .status.currentSimulatedTime
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      subresources:
+        status: {}

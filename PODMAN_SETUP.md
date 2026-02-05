@@ -220,7 +220,7 @@ podman machine inspect | grep PortForwarding
 
 # Manually forward ports (if needed)
 kubectl port-forward -n monitoring svc/prometheus 9090:9090 &
-kubectl port-forward -n monitoring svc/metrics-exporter 8000:8000 &
+kubectl port-forward -n monitoring svc/metrics-exporter 8001:8000 &
 ```
 
 ## Performance Considerations
@@ -340,7 +340,7 @@ podman machine start
 # 3. Verify
 kubectl get nodes
 curl http://localhost:9090/-/healthy
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 
 # 4. Run simulation
 python cli_prometheus.py

@@ -185,7 +185,7 @@ Now works with scheduler-assigned pods:
 Prometheus scrape endpoint. Automatically refreshes metrics from pods before serving.
 
 ```bash
-curl http://localhost:8000/metrics
+curl http://localhost:8001/metrics
 ```
 
 ### `/health` (GET)

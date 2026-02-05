@@ -1,0 +1,67 @@
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: SimulationScenario
+metadata:
+  name: stress-hot-nodes
+  namespace: default
+spec:
+  # Run for 30 minutes (real time)
+  duration: 30m
+  timeScale: 1.0  # Real-time (recommended for realistic metric aggregations)
+
+  # Define node selectors
+  nodeSelectors:
+    most-loaded:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+
+    least-loaded:
+      type: dynamic
+      strategy: minMetric
+      metric: cpu_usage
+
+  # Define task types
+  taskTypes:
+    heavy-load:
+      resources:
+        cpu: {min: 0.40, max: 0.80, distribution: uniform}
+        memory: {min: 0.30, max: 0.60, distribution: uniform}
+      duration: {min: 300, max: 900, mean: 600}  # 5-15 minutes
+
+    light-load:
+      resources:
+        cpu: {min: 0.05, max: 0.15, distribution: uniform}
+        memory: {min: 0.05, max: 0.15, distribution: uniform}
+      duration: {min: 60, max: 180, mean: 120}  # 1-3 minutes
+
+  # Task generators
+  taskGenerators:
+    # Stress the hottest node even more
+    - name: amplify-hotspot
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: most-loaded
+        vmSelection:
+          count: {min: 1, max: 2, distribution: uniform}
+          strategy: random
+      taskType: heavy-load
+      rate: {value: 1}
+
+    # Keep underloaded nodes from being completely idle
+    - name: baseline-for-idle
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 2m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: least-loaded
+        vmSelection:
+          count: {value: 1}
+          strategy: random
+      taskType: light-load
+      rate: {lambda: 2, distribution: poisson}

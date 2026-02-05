@@ -235,6 +235,18 @@ install_vm_crd() {
     info "VirtualMachine CRD installed successfully"
 }
 
+install_scenario_crd() {
+    info "Installing SimulationScenario CRD..."
+
+    # Install the CRD
+    kubectl apply -f k8s/simulation-scenario-crd.yaml
+
+    info "Waiting for SimulationScenario CRD to be established..."
+    kubectl wait --for condition=established --timeout=60s crd/simulationscenarios.simulation.node-classifier.io
+
+    info "SimulationScenario CRD installed successfully"
+}
+
 install_prometheus_operator() {
     info "Installing Prometheus Operator..."
 
@@ -259,10 +271,12 @@ install_prometheus_operator() {
             --wait
     else
         info "Using kubectl to install Prometheus Operator..."
-        kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/bundle.yaml
+        # Use server-side apply to avoid annotation size limit issues with K8s 1.34+
+        kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/bundle.yaml
 
         # Wait for operator
-        kubectl wait --for=condition=Available deployment/prometheus-operator -n default --timeout=120s
+        info "Waiting for Prometheus Operator to be ready..."
+        kubectl wait --for=condition=Available deployment/prometheus-operator -n default --timeout=180s
 
         # Apply Prometheus instance
         kubectl apply -f k8s/prometheus.yaml
@@ -594,6 +608,24 @@ EOF
     info "Eviction webhook deployed successfully"
 }
 
+deploy_scenario_controller() {
+    info "Deploying scenario controller..."
+
+    # Create ConfigMap with Python code
+    kubectl create configmap scenario-controller-code \
+        --from-file=scenario_controller.py \
+        --from-file=node.py \
+        --from-file=vm_manager.py \
+        -n default \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+    info "Deploying scenario controller deployment..."
+    kubectl apply -f k8s/scenario-controller.yaml
+
+    info "Waiting for scenario controller to be ready..."
+    kubectl wait --for=condition=Available deployment/scenario-controller -n default --timeout=120s
+}
+
 verify_installation() {
     info "Verifying installation..."
 
@@ -606,6 +638,10 @@ verify_installation() {
     kubectl get crd virtualmachines.simulation.node-classifier.io
 
     echo ""
+    info "SimulationScenario CRD:"
+    kubectl get crd simulationscenarios.simulation.node-classifier.io
+
+    echo ""
     info "Monitoring pods:"
     kubectl get pods -n monitoring
 
@@ -616,6 +652,22 @@ verify_installation() {
     echo ""
     info "Eviction webhook:"
     kubectl get pods -l app=eviction-webhook -n monitoring
+
+    echo ""
+    info "Scenario controller:"
+    kubectl get pods -l app=scenario-controller
+
+    echo ""
+    info "VirtualMachines:"
+    kubectl get vm
+
+    echo ""
+    info "SimulationScenarios:"
+    kubectl get scenarios
+
+    echo ""
+    info "Virt-launcher pods:"
+    kubectl get pods -l app=virt-launcher
 
     echo ""
     info "Services:"
@@ -639,18 +691,20 @@ print_access_info() {
     info "Installed components:"
     echo "  ✓ KIND cluster with KWOK nodes"
     echo "  ✓ VirtualMachine CRD"
+    echo "  ✓ SimulationScenario CRD"
     echo "  ✓ Prometheus Operator"
     echo "  ✓ Descheduler"
     echo "  ✓ Metrics Exporter"
     echo "  ✓ Eviction Webhook (KubeVirt-style)"
+    echo "  ✓ Scenario Controller"
     echo ""
     info "Access endpoints:"
     echo "  Prometheus:       http://localhost:9090"
-    echo "  Metrics Exporter: http://localhost:8000"
+    echo "  Metrics Exporter: http://localhost:8001"
     echo ""
     info "Test connectivity:"
-    echo "  curl http://localhost:8000/health"
-    echo "  curl http://localhost:8000/metrics"
+    echo "  curl http://localhost:8001/health"
+    echo "  curl http://localhost:8001/metrics"
     echo "  curl http://localhost:9090/-/healthy"
     echo ""
     info "Work with VirtualMachines:"
@@ -658,19 +712,44 @@ print_access_info() {
     echo "  kubectl apply -f k8s/example-vms.yaml  # Create example VMs"
     echo "  kubectl describe vm <name>         # Get VM details"
     echo ""
+    info "Work with SimulationScenarios:"
+    echo "  kubectl get scenarios              # List scenarios"
+    echo "  kubectl apply -f k8s/example-scenario-simple.yaml  # Run simple scenario"
+    echo "  kubectl apply -f k8s/example-scenario-node-aware.yaml  # Run node-aware scenario"
+    echo "  kubectl describe scenario <name>   # Get scenario status"
+    echo "  kubectl logs -l app=scenario-controller -f  # Watch scenario execution"
+    echo ""
     info "Test eviction webhook (triggers live migration):"
     echo "  kubectl delete pod <virt-launcher-pod-name>"
     echo "  kubectl logs -l app=eviction-webhook -n monitoring -f  # Watch migration logs"
     echo ""
-    info "Load metrics into Prometheus:"
-    echo "  python prometheus_loader.py --url http://localhost:9090"
+    info "Monitor descheduler:"
+    echo "  kubectl logs -n kube-descheduler deployment/descheduler -f"
     echo ""
-    info "Run closed-loop simulation:"
-    echo "  python cli_prometheus.py --prometheus http://localhost:9090 --exporter http://localhost:8000"
+    info "Watch VM migrations:"
+    echo "  kubectl get vm -w"
     echo ""
     info "Cleanup:"
     echo "  kind delete cluster --name ${KIND_CLUSTER_NAME}"
     echo ""
+}
+
+create_example_vms() {
+    info "Creating example VirtualMachines..."
+
+    kubectl apply -f k8s/example-vms.yaml
+
+    info "Waiting for VMs to be created..."
+    sleep 3
+
+    VM_COUNT=$(kubectl get vm --no-headers 2>/dev/null | wc -l)
+    info "Created $VM_COUNT VirtualMachines"
+
+    info "Waiting for virt-launcher pods to be created..."
+    sleep 5
+
+    POD_COUNT=$(kubectl get pods -l app=virt-launcher --no-headers 2>/dev/null | wc -l)
+    info "Created $POD_COUNT virt-launcher pods"
 }
 
 # Main execution
@@ -679,11 +758,14 @@ main() {
     create_kind_cluster
     install_kwok
     install_vm_crd
+    install_scenario_crd
     install_prometheus_operator
     install_descheduler
     deploy_vm_controller
     build_and_deploy_exporter
     deploy_eviction_webhook
+    deploy_scenario_controller
+    create_example_vms
     verify_installation
     print_access_info
 }

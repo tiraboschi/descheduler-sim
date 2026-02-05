@@ -62,8 +62,8 @@ if ! curl -s http://localhost:9090/-/healthy > /dev/null; then
     exit 1
 fi
 
-if ! curl -s http://localhost:8000/health > /dev/null; then
-    error "Metrics exporter is not reachable at http://localhost:8000"
+if ! curl -s http://localhost:8001/health > /dev/null; then
+    error "Metrics exporter is not reachable at http://localhost:8001"
     exit 1
 fi
 
@@ -72,12 +72,12 @@ info "✓ Connectivity check passed"
 # Test 2: Check if scenario is loaded
 info "Test 2: Checking if scenario is loaded in exporter..."
 
-NODE_COUNT=$(curl -s http://localhost:8000/health | jq -r '.nodes')
+NODE_COUNT=$(curl -s http://localhost:8001/health | jq -r '.nodes')
 
 if [ "$NODE_COUNT" -eq "0" ]; then
     warn "No scenario loaded in exporter, loading test scenario..."
 
-    curl -s -X POST http://localhost:8000/scenario \
+    curl -s -X POST http://localhost:8001/scenario \
       -H "Content-Type: application/json" \
       -d '{
         "nodes": [
@@ -142,7 +142,7 @@ fi
 # Test 5: Test feedback endpoint
 info "Test 5: Testing feedback endpoint..."
 
-FEEDBACK_RESPONSE=$(curl -s -X POST http://localhost:8000/feedback \
+FEEDBACK_RESPONSE=$(curl -s -X POST http://localhost:8001/feedback \
   -H "Content-Type: application/json" \
   -d '{
     "migrations": [
@@ -207,5 +207,5 @@ info "View Prometheus:"
 echo "  http://localhost:9090"
 echo ""
 info "View metrics:"
-echo "  http://localhost:8000/metrics"
+echo "  http://localhost:8001/metrics"
 echo ""
