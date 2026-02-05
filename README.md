@@ -8,6 +8,7 @@ This project provides a complete testing environment for the Kubernetes Deschedu
 - **Prometheus** for metrics collection and algorithm scoring via PromQL recording rules
 - **KWOK** for simulating Kubernetes nodes without actual compute resources
 - **VirtualMachine CRD** for representing KubeVirt-like VMs
+- **SimulationScenario CRD** for creating dynamic, time-based workload patterns
 - **Eviction Webhook** for handling VM migration on pod eviction
 - **Synthetic Metrics Exporter** for generating realistic node metrics
 
@@ -16,9 +17,9 @@ The descheduler uses Prometheus metrics to identify overutilized and underutiliz
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Kubernetes Cluster (KIND)                     │
-│                                                                  │
+┌────────────────────────────────────────────────────────────────┐
+│                    Kubernetes Cluster (KIND)                   │
+│                                                                │
 │  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐  │
 │  │ Descheduler  │      │  Prometheus  │      │ KWOK Nodes   │  │
 │  │              │◄─────┤              │◄─────┤              │  │
@@ -27,9 +28,9 @@ The descheduler uses Prometheus metrics to identify overutilized and underutiliz
 │  │ - Evicts     │      │ - Recording  │      │              │  │
 │  │   pods       │      │   rules      │      │              │  │
 │  └──────┬───────┘      └──────────────┘      └──────────────┘  │
-│         │                                                        │
-│         │ eviction                                               │
-│         ▼                                                        │
+│         │                                                      │
+│         │ eviction                                             │
+│         ▼                                                      │
 │  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐  │
 │  │  Eviction    │      │     VM       │      │    Metrics   │  │
 │  │  Webhook     │─────►│  Controller  │      │   Exporter   │  │
@@ -40,10 +41,10 @@ The descheduler uses Prometheus metrics to identify overutilized and underutiliz
 │  │   migrations │      │   deletes    │      │ - Exposes    │  │
 │  │              │      │   pods       │      │   /metrics   │  │
 │  └──────────────┘      └──────────────┘      └──────────────┘  │
-│                                │                       │         │
-│                                └───────────────────────┘         │
-│                                    Reads/Updates pods            │
-└─────────────────────────────────────────────────────────────────┘
+│                                │                       │       │
+│                                └───────────────────────┘       │
+│                                    Reads/Updates pods          │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ## Features
@@ -51,6 +52,9 @@ The descheduler uses Prometheus metrics to identify overutilized and underutiliz
 - **Real Kubernetes Descheduler**: Uses the actual descheduler from OpenShift/Kubernetes
 - **Prometheus-Based Algorithms**: 19 load classification algorithms implemented as PromQL recording rules
 - **Closed-Loop Simulation**: Evictions trigger migrations, which update metrics, which affect next evictions
+- **Dynamic Workload Scenarios**: Create complex load patterns with SimulationScenarios
+- **Node-Aware Task Generation**: Target VMs on most/least loaded nodes to test rebalancing
+- **Stochastic Traffic Modeling**: Realistic workloads with Poisson/Normal/Exponential distributions
 - **KubeVirt-Style VM Migration**: Mimics KubeVirt's VM lifecycle with virt-launcher pods
 - **Eviction Protection**: Webhook prevents direct pod deletion, enforcing proper migration workflow
 - **KWOK Integration**: Simulates nodes without actual compute resources
@@ -67,7 +71,7 @@ pip install -r requirements.txt
 
 # 3. Access services
 # Prometheus: http://localhost:9090
-# Metrics Exporter: http://localhost:8000
+# Metrics Exporter: http://localhost:8001
 # Descheduler metrics: http://localhost:8443/metrics (via nginx proxy)
 
 # 4. Watch the descheduler in action
@@ -75,7 +79,40 @@ kubectl logs -n kube-descheduler deployment/descheduler -f
 
 # 5. Monitor VM migrations
 kubectl get vm -w
+
+# 6. Run a simulation scenario (optional)
+kubectl apply -f k8s/example-scenario-simple.yaml
+kubectl get scenarios -w
 ```
+
+## Simulation Scenarios
+
+Create dynamic workload patterns to test the descheduler:
+
+```bash
+# Apply a simple scenario (periodic traffic with random VM selection)
+kubectl apply -f k8s/example-scenario-simple.yaml
+
+# Apply a node-aware scenario (targets most/least loaded nodes)
+kubectl apply -f k8s/example-scenario-node-aware.yaml
+
+# Watch scenario execution
+kubectl get scenarios -w
+kubectl logs -l app=scenario-controller -f
+
+# Monitor VM utilization changes
+kubectl get vm -w
+```
+
+**Key Features:**
+- **Node-Aware Targeting**: Generate load on most/least loaded nodes to create imbalance
+- **Stochastic Tasks**: Realistic traffic patterns with Poisson/Normal/Exponential distributions
+- **Dynamic Resources**: Tasks with varying CPU/memory consumption and duration
+- **Scheduled Events**: Apply load patterns according to a timeline
+
+**Note**: The scenario controller generates load patterns rapidly, but Prometheus metrics, recording rules, and the descheduler all operate on real time. Use `timeScale: 1.0` for realistic metric aggregations.
+
+See [SCENARIO_GUIDE.md](SCENARIO_GUIDE.md) for complete documentation.
 
 ## Components
 
@@ -92,6 +129,8 @@ kubectl get vm -w
 | Eviction Webhook | `k8s/eviction-webhook.yaml` | Intercepts pod evictions |
 | VM Controller | `k8s/vm-controller.yaml` | Manages VM lifecycle |
 | VirtualMachine CRD | `k8s/virtualmachine-crd.yaml` | Custom resource definition for VMs |
+| SimulationScenario CRD | `k8s/simulation-scenario-crd.yaml` | CRD for dynamic workload scenarios |
+| Scenario Controller | `k8s/scenario-controller.yaml` | Executes simulation scenarios |
 
 ### Python Components
 
@@ -100,6 +139,7 @@ kubectl get vm -w
 | `prometheus_exporter.py` | Generates synthetic node metrics from pod annotations |
 | `eviction_webhook.py` | Handles pod eviction requests from descheduler |
 | `vm_controller.py` | Manages VirtualMachine CR lifecycle |
+| `scenario_controller.py` | Executes SimulationScenario CRs with dynamic task generation |
 | `vm_manager.py` | Creates/updates VM custom resources |
 | `pod_manager.py` | Manages virt-launcher pod lifecycle and migrations |
 | `node.py` | Data structures for nodes and VMs |
@@ -273,7 +313,7 @@ kubectl logs -n kube-descheduler deployment/descheduler | grep -i evict
 
 # Manual health checks
 curl http://localhost:9090/-/healthy  # Prometheus
-curl http://localhost:8000/health     # Metrics Exporter
+curl http://localhost:8001/health     # Metrics Exporter
 
 # Check metrics are being scraped
 curl http://localhost:9090/api/v1/targets
@@ -380,6 +420,7 @@ podman system prune -a
 
 | File | Description |
 |------|-------------|
+| [SCENARIO_GUIDE.md](SCENARIO_GUIDE.md) | Complete guide to creating dynamic workload scenarios |
 | [PROMETHEUS_ALGORITHMS.md](PROMETHEUS_ALGORITHMS.md) | All 19 algorithms with PromQL implementations |
 | [QUICKSTART.md](QUICKSTART.md) | Quick reference guide |
 | [PODMAN_SETUP.md](PODMAN_SETUP.md) | Podman-specific configuration |

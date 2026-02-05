@@ -120,9 +120,9 @@ See [PROMETHEUS_ALGORITHMS.md](PROMETHEUS_ALGORITHMS.md) for the complete list.
 | Service | URL | Purpose |
 |---------|-----|---------|
 | Prometheus | http://localhost:9090 | Query metrics, view recording rules |
-| Metrics Exporter | http://localhost:8000/metrics | View raw metrics |
-| Exporter Health | http://localhost:8000/health | Check exporter status |
-| Exporter State | http://localhost:8000/scenario | View current node state |
+| Metrics Exporter | http://localhost:8001/metrics | View raw metrics |
+| Exporter Health | http://localhost:8001/health | Check exporter status |
+| Exporter State | http://localhost:8001/scenario | View current node state |
 
 ## Working with VirtualMachines
 
@@ -194,11 +194,11 @@ kubectl logs -n monitoring -l app=metrics-exporter
 ```bash
 # Test connectivity
 curl http://localhost:9090/-/healthy
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 
 # Port forward manually if needed
 kubectl port-forward -n monitoring svc/prometheus 9090:9090
-kubectl port-forward -n monitoring svc/metrics-exporter 8000:8000
+kubectl port-forward -n monitoring svc/metrics-exporter 8001:8000
 ```
 
 ### Recording rules not working

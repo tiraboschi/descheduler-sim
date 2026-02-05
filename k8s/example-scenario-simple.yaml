@@ -1,0 +1,35 @@
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: SimulationScenario
+metadata:
+  name: simple-workload
+  namespace: default
+spec:
+  # Run for 10 minutes (real time)
+  duration: 10m
+  timeScale: 1.0  # Real-time (recommended for realistic metric aggregations)
+
+  # Define VM pool
+  vmPools:
+    workers:
+      vms: [vm-small-1, vm-medium-1, vm-large-1]
+
+  # Define task type
+  taskTypes:
+    user-request:
+      resources:
+        cpu: {min: 0.05, max: 0.20, distribution: normal, mean: 0.10, stddev: 0.03}
+        memory: {min: 0.03, max: 0.10, distribution: normal, mean: 0.06, stddev: 0.02}
+      duration: {min: 30, max: 300, mean: 120, distribution: exponential}  # seconds
+
+  # Generate user traffic
+  taskGenerators:
+    - name: user-traffic
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 30s  # Generate every 30 seconds
+      assignment:
+        strategy: random
+        pool: workers
+      taskType: user-request
+      rate: {lambda: 3, distribution: poisson}  # Average 3 requests per interval

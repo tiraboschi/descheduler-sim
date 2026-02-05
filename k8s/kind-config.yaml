@@ -16,7 +16,7 @@ nodes:
       - containerPort: 30090
         hostPort: 9090
         protocol: TCP
-      # Metrics exporter
+      # Metrics exporter (using 8001 instead of 8000 to avoid conflict with ps-printer-app)
       - containerPort: 30800
-        hostPort: 8000
+        hostPort: 8001
         protocol: TCP
