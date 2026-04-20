@@ -46,7 +46,10 @@ class PodManager:
     """
 
     def __init__(self, namespace: str = "default", use_in_cluster_config: bool = False,
-                 create_vm_crs: bool = True, enable_migration_controller: bool = False):
+                 create_vm_crs: bool = True, enable_migration_controller: bool = False,
+                 max_parallel_migrations: int = 4,
+                 migration_update_interval: float = 1.0,
+                 migration_timeout_s: float = 300.0):
         """
         Initialize the pod manager.
 
@@ -61,10 +64,15 @@ class PodManager:
         self.create_vm_crs = create_vm_crs
         self.vm_manager: Optional[VMManager] = None
 
+        # Migration concurrency parameters
+        self.max_parallel_migrations = max_parallel_migrations
+        self.migration_update_interval = migration_update_interval
+        self.migration_timeout_s = migration_timeout_s
+
         # Migration controller state
         self._migration_controller_thread: Optional[threading.Thread] = None
         self._migration_controller_running = False
-        self._migrations_in_progress: set = set()  # Track VMs currently migrating
+        self._migrations_in_progress: dict = {}  # vm_id -> (from_node, to_node); to_node="" until target scheduled
         self._migration_lock = threading.Lock()
         self._enable_migration_controller = enable_migration_controller
 
@@ -119,7 +127,8 @@ class PodManager:
         return f"virt-launcher-{vm_id}-{suffix}"
 
     def _create_pod_spec(self, vm: VM, node_name: Optional[str] = None,
-                         exclude_node: Optional[str] = None, vm_cr_uid: Optional[str] = None) -> client.V1Pod:
+                         exclude_node: Optional[str] = None, vm_cr_uid: Optional[str] = None,
+                         initial_memory_utilization: Optional[float] = None) -> client.V1Pod:
         """
         Create a pod specification for a VM.
 
@@ -137,6 +146,7 @@ class PodManager:
         # Create annotations with resource allocation AND utilization
         # Allocation: what the VM has
         # Utilization: what the VM is actually using (for simulation/metrics)
+        mem_util = initial_memory_utilization if initial_memory_utilization is not None else vm.memory_utilization
         annotations = {
             "kubevirt.io/domain": vm.id,
             # Descheduler annotation - tells descheduler this pod supports background eviction
@@ -146,7 +156,9 @@ class PodManager:
             "simulation.node-classifier.io/vm-memory-bytes": str(vm.memory_bytes),
             # Resource utilization (fake/expected usage for simulation)
             "simulation.node-classifier.io/vm-cpu-utilization": str(vm.cpu_utilization),
-            "simulation.node-classifier.io/vm-memory-utilization": str(vm.memory_utilization),
+            "simulation.node-classifier.io/vm-memory-utilization": str(mem_util),
+            # Migration characteristics
+            "simulation.node-classifier.io/vm-dirty-rate-mbps": str(vm.dirty_rate_mbps),
         }
 
         # Calculate pod resource requests
@@ -441,6 +453,100 @@ class PodManager:
 
         return stats
 
+    def _patch_pod_memory_utilization(self, pod_name: str, memory_utilization: float) -> None:
+        """Patch the vm-memory-utilization annotation on an arbitrary pod by name."""
+        try:
+            patch = {"metadata": {"annotations": {
+                "simulation.node-classifier.io/vm-memory-utilization": str(memory_utilization)
+            }}}
+            self.v1.patch_namespaced_pod(name=pod_name, namespace=self.namespace, body=patch)
+        except ApiException as e:
+            logger.warning(f"Failed to patch memory utilization on pod {pod_name}: {e}")
+
+    def _get_migration_bandwidth_bytes_per_s(self) -> float:
+        """
+        Return total migration link bandwidth in bytes/s.
+
+        Reads networkBandwidthMbps from the currently Running SimulationScenario.
+        Falls back to 10 000 Mbps (= 10 Gbps) when no scenario is active.
+
+        Unit: Mbps — megabits per second (small b = bits).
+        """
+        _DEFAULT_Mbps = 10_000.0  # 10 Gbps
+        try:
+            from kubernetes import client as k8s_client
+            custom_api = k8s_client.CustomObjectsApi()
+            scenarios = custom_api.list_namespaced_custom_object(
+                group="simulation.node-classifier.io",
+                version="v1alpha1",
+                namespace=self.namespace,
+                plural="simulationscenarios",
+            )
+            for scenario in scenarios.get("items", []):
+                if scenario.get("status", {}).get("phase") == "Running":
+                    mbps = float(scenario.get("spec", {}).get("networkBandwidthMbps", _DEFAULT_Mbps))
+                    return mbps * 1e6 / 8  # Mbps → bytes/s
+        except Exception as e:
+            logger.debug(f"Could not read SimulationScenario bandwidth, using default: {e}")
+        return _DEFAULT_Mbps * 1e6 / 8  # Mbps → bytes/s
+
+    def _simulate_pre_copy_phase(self, vm: VM, from_node: str, to_node: str, target_pod_name: str) -> None:
+        """
+        Simulate the pre-copy live migration phase.
+
+        Progressively ramps the target pod's memory-utilization annotation from 0 to the
+        VM's steady-state value over the calculated convergence time.  After this method
+        returns, both source and target pods carry the full memory utilization (stop-and-copy
+        handoff is considered instantaneous for simulation purposes).
+
+        Migration convergence time is derived from the standard pre-copy geometric-series:
+            t = memory_bytes / (effective_bandwidth - dirty_rate)
+
+        Bandwidth is divided per node NIC, not globally:
+        - outgoing: migrations leaving from_node (share its egress NIC)
+        - incoming: migrations arriving at to_node (share its ingress NIC)
+        - effective_bw = total_bw / max(outgoing, incoming)
+        """
+        with self._migration_lock:
+            outgoing = sum(1 for fn, _ in self._migrations_in_progress.values() if fn == from_node)
+            incoming = sum(1 for _, tn in self._migrations_in_progress.values() if tn == to_node)
+        num_concurrent = max(1, outgoing, incoming)
+
+        total_bandwidth_bytes_per_s = self._get_migration_bandwidth_bytes_per_s()
+        bandwidth_bytes_per_s = total_bandwidth_bytes_per_s / num_concurrent
+        dirty_bytes_per_s = vm.dirty_rate_mbps * 1e6 / 8  # Mbps → bytes/s
+
+        if dirty_bytes_per_s >= bandwidth_bytes_per_s:
+            precopy_time = self.migration_timeout_s
+            logger.warning(
+                f"VM {vm.id}: dirty rate ({vm.dirty_rate_mbps} Mbps) >= effective bandwidth "
+                f"({bandwidth_bytes_per_s * 8 / 1e6:.1f} Mbps) — migration may not converge, "
+                f"capping at {self.migration_timeout_s:.0f}s"
+            )
+        else:
+            precopy_time = min(
+                self.migration_timeout_s,
+                vm.memory_bytes / (bandwidth_bytes_per_s - dirty_bytes_per_s)
+            )
+
+        logger.info(
+            f"   Pre-copy timing: memory={vm.memory_bytes / 2**30:.2f} GiB, "
+            f"total_bw={total_bandwidth_bytes_per_s * 8 / 1e6:.0f} Mbps "
+            f"(outgoing={outgoing} from {from_node}, incoming={incoming} to {to_node}) "
+            f"→ {bandwidth_bytes_per_s * 8 / 1e6:.0f} Mbps effective, "
+            f"dirty={vm.dirty_rate_mbps:.0f} Mbps → est. {precopy_time:.1f}s"
+        )
+
+        steps = max(1, int(precopy_time / self.migration_update_interval))
+        for step in range(steps):
+            fraction = (step + 1) / steps
+            self._patch_pod_memory_utilization(target_pod_name, vm.memory_utilization * fraction)
+            time.sleep(self.migration_update_interval)
+
+        # Ensure final value is exact (guard against float rounding in the loop)
+        self._patch_pod_memory_utilization(target_pod_name, vm.memory_utilization)
+        logger.info(f"   Pre-copy complete: target pod {target_pod_name} at full memory utilization")
+
     def migrate_vm_pod(self, vm: VM, from_node: str, to_node: Optional[str] = None) -> bool:
         """
         Simulate KubeVirt live migration: create target pod with anti-affinity, then delete source.
@@ -492,12 +598,14 @@ class PodManager:
             except Exception as e:
                 logger.warning(f"Could not get VM CR UID for migration target pod: {e}")
 
-            # Create pod spec with anti-affinity to source node
+            # Create pod spec with anti-affinity to source node.
+            # Target starts with memory_utilization=0: it will ramp up during pre-copy.
             target_pod_spec = self._create_pod_spec(
                 vm,
                 node_name=to_node,  # None if scheduler should decide
                 exclude_node=from_node,  # Anti-affinity: don't schedule on source node
-                vm_cr_uid=vm_cr_uid
+                vm_cr_uid=vm_cr_uid,
+                initial_memory_utilization=0.0,
             )
 
             created_pod = self.v1.create_namespaced_pod(
@@ -557,58 +665,64 @@ class PodManager:
                 pass
             return False
 
-        # Step 3: Simulate migration in progress (both pods running)
+        # Step 3: Pre-copy phase — both pods run simultaneously while memory is transferred
         logger.info(f"   Migration in progress: source on {from_node}, target on {target_node}")
-        logger.info(f"   Both pods running simultaneously (simulating live migration)")
-        time.sleep(0.5)  # Brief pause to simulate migration
-
-        # Step 4: Delete source pod (migration complete)
-        # IMPORTANT: Delete source pod BEFORE updating VM CR
-        # This ensures webhook can correctly identify source pod (VM node == pod node)
-        # First remove finalizer to allow deletion
-        logger.info(f"   Migration complete, removing finalizer from source pod {source_pod_name}")
-        finalizer_removed = self._remove_pod_finalizer(source_pod_name)
-        if finalizer_removed:
-            # Wait briefly for API server to propagate the finalizer removal
-            # This prevents race condition where webhook reads stale pod state
-            time.sleep(0.5)
-
-        # Now delete the source pod
-        logger.info(f"   Deleting source pod {source_pod_name}")
+        logger.info(f"   Both pods running simultaneously (pre-copy live migration)")
+        with self._migration_lock:
+            self._migrations_in_progress[vm.id] = (from_node, target_node)
         try:
-            self.v1.delete_namespaced_pod(
-                name=source_pod_name,
-                namespace=self.namespace,
-                grace_period_seconds=0
+            self._simulate_pre_copy_phase(vm, from_node, target_node, target_pod_name)
+
+            # Step 4: Delete source pod (migration complete)
+            # IMPORTANT: Delete source pod BEFORE updating VM CR
+            # This ensures webhook can correctly identify source pod (VM node == pod node)
+            # First remove finalizer to allow deletion
+            logger.info(f"   Migration complete, removing finalizer from source pod {source_pod_name}")
+            finalizer_removed = self._remove_pod_finalizer(source_pod_name)
+            if finalizer_removed:
+                # Wait briefly for API server to propagate the finalizer removal
+                # This prevents race condition where webhook reads stale pod state
+                time.sleep(0.5)
+
+            # Now delete the source pod
+            logger.info(f"   Deleting source pod {source_pod_name}")
+            try:
+                self.v1.delete_namespaced_pod(
+                    name=source_pod_name,
+                    namespace=self.namespace,
+                    grace_period_seconds=0
+                )
+                logger.info(f"   Source pod {source_pod_name} deleted successfully")
+            except ApiException as e:
+                logger.warning(f"Failed to delete source pod {source_pod_name}: {e}")
+                # Continue anyway, target is running
+
+            # Step 5: Update VM to point to target pod (after source is deleted)
+            vm.pod_name = target_pod_name
+            vm.scheduled_node = target_node
+
+            # Update registry
+            self.pod_registry[vm.id] = PodInfo(
+                vm_id=vm.id,
+                pod_name=target_pod_name,
+                node_name=target_node,
+                cpu_cores=vm.cpu_cores,
+                memory_bytes=vm.memory_bytes,
+                cpu_utilization=vm.cpu_utilization,
+                memory_utilization=vm.memory_utilization
             )
-            logger.info(f"   Source pod {source_pod_name} deleted successfully")
-        except ApiException as e:
-            logger.warning(f"Failed to delete source pod {source_pod_name}: {e}")
-            # Continue anyway, target is running
 
-        # Step 5: Update VM to point to target pod (after source is deleted)
-        vm.pod_name = target_pod_name
-        vm.scheduled_node = target_node
+            # Update VM CR status
+            if self.vm_manager:
+                self.vm_manager.update_vm_status(vm.id, "Running", target_pod_name, target_node)
 
-        # Update registry
-        self.pod_registry[vm.id] = PodInfo(
-            vm_id=vm.id,
-            pod_name=target_pod_name,
-            node_name=target_node,
-            cpu_cores=vm.cpu_cores,
-            memory_bytes=vm.memory_bytes,
-            cpu_utilization=vm.cpu_utilization,
-            memory_utilization=vm.memory_utilization
-        )
-
-        # Update VM CR status
-        if self.vm_manager:
-            self.vm_manager.update_vm_status(vm.id, "Running", target_pod_name, target_node)
-
-        logger.info(f"✅ Successfully migrated VM {vm.id}: {from_node} → {target_node}")
-        logger.info(f"   Old pod: {source_pod_name} (deleted)")
-        logger.info(f"   New pod: {target_pod_name} (running)")
-        return True
+            logger.info(f"✅ Successfully migrated VM {vm.id}: {from_node} → {target_node}")
+            logger.info(f"   Old pod: {source_pod_name} (deleted)")
+            logger.info(f"   New pod: {target_pod_name} (running)")
+            return True
+        finally:
+            with self._migration_lock:
+                self._migrations_in_progress.pop(vm.id, None)
 
     def update_pod_annotations(self, vm_id: str, cpu_utilization: float = None, memory_utilization: float = None) -> bool:
         """
@@ -763,6 +877,7 @@ class PodManager:
                 memory_bytes = int(annotations.get("simulation.node-classifier.io/vm-memory-bytes", "1073741824"))
                 cpu_utilization = float(annotations.get("simulation.node-classifier.io/vm-cpu-utilization", "0.5"))
                 memory_utilization = float(annotations.get("simulation.node-classifier.io/vm-memory-utilization", "0.5"))
+                dirty_rate_mbps = float(annotations.get("simulation.node-classifier.io/vm-dirty-rate-mbps", "800.0"))
             except (ValueError, TypeError) as e:
                 logger.error(f"Failed to parse VM resource annotations from pod {pod_name}: {e}")
                 self._remove_pod_finalizer(pod_name)
@@ -775,7 +890,8 @@ class PodManager:
                 cpu_cores=cpu_cores,
                 memory_bytes=memory_bytes,
                 cpu_utilization=cpu_utilization,
-                memory_utilization=memory_utilization
+                memory_utilization=memory_utilization,
+                dirty_rate_mbps=dirty_rate_mbps,
             )
             vm.pod_name = pod_name
             vm.scheduled_node = source_node
@@ -806,7 +922,7 @@ class PodManager:
             self._remove_pod_finalizer(pod_name)
         finally:
             with self._migration_lock:
-                self._migrations_in_progress.discard(vm_id)
+                self._migrations_in_progress.pop(vm_id, None)
 
     def _migrate_vm_pod_for_eviction(self, vm: VM, from_node: str, to_node: Optional[str] = None) -> bool:
         """
@@ -843,7 +959,10 @@ class PodManager:
             except Exception as e:
                 logger.warning(f"Could not get VM CR UID for eviction migration target pod: {e}")
 
-            target_pod_spec = self._create_pod_spec(vm, node_name=to_node, exclude_node=from_node, vm_cr_uid=vm_cr_uid)
+            target_pod_spec = self._create_pod_spec(
+                vm, node_name=to_node, exclude_node=from_node, vm_cr_uid=vm_cr_uid,
+                initial_memory_utilization=0.0,
+            )
             created_pod = self.v1.create_namespaced_pod(namespace=self.namespace, body=target_pod_spec)
             target_pod_name = created_pod.metadata.name
             logger.info(f"   Target pod created: {target_pod_name}")
@@ -881,9 +1000,12 @@ class PodManager:
                 pass
             return False
 
-        # Simulate migration
+        # Pre-copy phase — both pods run simultaneously while memory is transferred
         logger.info(f"   Migration in progress: source on {from_node}, target on {target_node}")
-        time.sleep(0.5)
+        logger.info(f"   Both pods running simultaneously (pre-copy live migration)")
+        with self._migration_lock:
+            self._migrations_in_progress[vm.id] = (from_node, target_node)
+        self._simulate_pre_copy_phase(vm, from_node, target_node, target_pod_name)
 
         # Update VM to point to target pod
         vm.pod_name = target_pod_name
@@ -1007,6 +1129,7 @@ class PodManager:
                 memory_bytes = int(annotations.get("simulation.node-classifier.io/vm-memory-bytes", "1073741824"))
                 cpu_utilization = float(annotations.get("simulation.node-classifier.io/vm-cpu-utilization", "0.5"))
                 memory_utilization = float(annotations.get("simulation.node-classifier.io/vm-memory-utilization", "0.5"))
+                dirty_rate_mbps = float(annotations.get("simulation.node-classifier.io/vm-dirty-rate-mbps", "800.0"))
             except (ValueError, TypeError) as e:
                 logger.error(f"Failed to parse VM resource annotations from pod {pod_name}: {e}")
                 self._clear_vm_evacuation_marker(vm_id)
@@ -1019,7 +1142,8 @@ class PodManager:
                 cpu_cores=cpu_cores,
                 memory_bytes=memory_bytes,
                 cpu_utilization=cpu_utilization,
-                memory_utilization=memory_utilization
+                memory_utilization=memory_utilization,
+                dirty_rate_mbps=dirty_rate_mbps,
             )
             vm.pod_name = pod_name
             vm.scheduled_node = evacuation_node
@@ -1052,7 +1176,7 @@ class PodManager:
             self._clear_vm_evacuation_marker(vm_id)
         finally:
             with self._migration_lock:
-                self._migrations_in_progress.discard(vm_id)
+                self._migrations_in_progress.pop(vm_id, None)
 
     def _migration_controller_loop(self):
         """
@@ -1107,12 +1231,18 @@ class PodManager:
                         self._clear_vm_evacuation_marker(vm_id)
                         continue
 
-                    # Check if migration already in progress
+                    # Check concurrency limits before dispatching
                     with self._migration_lock:
                         if vm_id in self._migrations_in_progress:
                             logger.debug(f"Migration already in progress for VM {vm_id}, skipping")
                             continue
-                        self._migrations_in_progress.add(vm_id)
+                        if len(self._migrations_in_progress) >= self.max_parallel_migrations:
+                            logger.info(
+                                f"Max parallel migrations ({self.max_parallel_migrations}) reached, "
+                                f"deferring VM {vm_id}"
+                            )
+                            continue
+                        self._migrations_in_progress[vm_id] = (evacuation_node, "")  # to_node filled in when target scheduled
 
                     logger.info(f"🚀 VM {vm_id} marked for evacuation from node {evacuation_node}")
 

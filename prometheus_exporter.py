@@ -182,9 +182,9 @@ class ExporterState:
                     mem_util = float(annotations.get("simulation.node-classifier.io/vm-memory-utilization", "0"))
 
                     # Calculate actual consumption: cores * utilization / node_capacity
-                    # Assuming 32 cores and 128Gi per node
+                    # Assuming 32 cores and 512Gi per node
                     node_cpu_cores = 32.0
-                    node_memory_bytes = 128 * 1024 ** 3
+                    node_memory_bytes = 512 * 1024 ** 3
 
                     actual_cpu_consumption = (cpu_cores * cpu_util) / node_cpu_cores
                     actual_memory_consumption = (memory_bytes * mem_util) / node_memory_bytes
@@ -279,7 +279,7 @@ class ExporterState:
 
                 # Node-exporter style memory metrics (always set, not incremented)
                 # Calculate available memory from usage ratio
-                node_memory_bytes = 128 * 1024 ** 3  # 128 GiB
+                node_memory_bytes = 512 * 1024 ** 3  # 512 GiB
                 memory_available_bytes = node_memory_bytes * (1.0 - metrics["memory_usage"])
                 memory_available_gauge.labels(instance=node_name).set(memory_available_bytes)
 

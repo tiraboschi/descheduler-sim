@@ -121,6 +121,9 @@ class VMManager:
                     "cpu": str(vm.cpu_utilization),
                     "memory": str(vm.memory_utilization)
                 },
+                "migration": {
+                    "dirtyRateMbps": vm.dirty_rate_mbps
+                },
                 "running": True
             },
             "status": {

@@ -191,13 +191,17 @@ class VMController:
                 cpu_util = float(utilization.get("cpu", "0.5"))
                 memory_util = float(utilization.get("memory", "0.5"))
 
+                migration = spec.get("migration", {})
+                dirty_rate_mbps = float(migration.get("dirtyRateMbps", 800.0))
+
                 # Create VM object
                 vm = VM(
                     id=vm_name,
                     cpu_cores=cpu_cores,
                     memory_bytes=memory_bytes,
                     cpu_utilization=cpu_util,
-                    memory_utilization=memory_util
+                    memory_utilization=memory_util,
+                    dirty_rate_mbps=dirty_rate_mbps,
                 )
 
                 # Check if ANY pod exists for this VM (by label, not just status.podName)

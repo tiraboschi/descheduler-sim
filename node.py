@@ -43,6 +43,9 @@ class VM:
     cpu_utilization: float = 0.5  # CPU utilization ratio (0.0-1.0+, relative to cpu_cores)
     memory_utilization: float = 0.8  # Memory utilization ratio (0.0-1.0, relative to memory_bytes)
 
+    # Live migration characteristics
+    dirty_rate_mbps: float = 800.0  # Memory dirty rate in Mbps (megabits/s). Idle ~50, regular ~800, busy ~4000, very busy ~8000
+
     # Pod tracking
     pod_name: str = ""  # Name of the virt-launcher pod executing this VM
     scheduled_node: str = ""  # Node where the pod is scheduled (filled by watching)
@@ -59,9 +62,9 @@ class VM:
     def memory_consumption(self) -> float:
         """
         Calculate actual memory consumption as ratio of node capacity.
-        Assuming 128Gi per node for backward compatibility.
+        Assuming 512Gi per node.
         """
-        node_memory_bytes = 128 * 1024 * 1024 * 1024  # 128Gi
+        node_memory_bytes = 512 * 1024 * 1024 * 1024  # 512Gi
         return (self.memory_bytes * self.memory_utilization) / node_memory_bytes
 
     def memory_gi(self) -> float:
@@ -80,6 +83,7 @@ class VM:
             "memory_bytes": self.memory_bytes,
             "cpu_utilization": self.cpu_utilization,
             "memory_utilization": self.memory_utilization,
+            "dirty_rate_mbps": self.dirty_rate_mbps,
             "pod_name": self.pod_name,
             "scheduled_node": self.scheduled_node
         }
@@ -110,6 +114,7 @@ class VM:
             memory_bytes=data.get("memory_bytes", 1073741824),
             cpu_utilization=data.get("cpu_utilization", 0.5),
             memory_utilization=data.get("memory_utilization", 0.8),
+            dirty_rate_mbps=data.get("dirty_rate_mbps", 800.0),
             pod_name=data.get("pod_name", ""),
             scheduled_node=data.get("scheduled_node", "")
         )

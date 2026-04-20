@@ -7,6 +7,7 @@ spec:
   # Run for 10 minutes (real time)
   duration: 10m
   timeScale: 1.0  # Real-time (recommended for realistic metric aggregations)
+  networkBandwidthMbps: 10000  # 10 Gbps inter-node migration bandwidth
 
   # Define VM pool
   vmPools:
