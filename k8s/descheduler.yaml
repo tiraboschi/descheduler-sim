@@ -34,6 +34,7 @@ rules:
       - pods
       - nodes
       - namespaces
+      - persistentvolumeclaims
     verbs:
       - get
       - watch

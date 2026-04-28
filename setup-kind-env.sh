@@ -380,10 +380,10 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = prometheus-operator-kube-p-prometheus
-DNS.2 = prometheus-operator-kube-p-prometheus.monitoring
-DNS.3 = prometheus-operator-kube-p-prometheus.monitoring.svc
-DNS.4 = prometheus-operator-kube-p-prometheus.monitoring.svc.cluster.local
+DNS.1 = prometheus
+DNS.2 = prometheus.monitoring
+DNS.3 = prometheus.monitoring.svc
+DNS.4 = prometheus.monitoring.svc.cluster.local
 DNS.5 = localhost
 IP.1 = 127.0.0.1
 EOF
@@ -424,7 +424,7 @@ events {
 
 http {
     upstream prometheus {
-        server prometheus-operator-kube-p-prometheus.monitoring.svc.cluster.local:9090;
+        server prometheus.monitoring.svc.cluster.local:9090;
     }
 
     server {
