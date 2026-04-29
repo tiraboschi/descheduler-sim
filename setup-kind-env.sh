@@ -272,11 +272,14 @@ install_prometheus_operator() {
     else
         info "Using kubectl to install Prometheus Operator..."
         # Use server-side apply to avoid annotation size limit issues with K8s 1.34+
-        kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/bundle.yaml
+        # Redirect all default-namespace resources to monitoring
+        curl -s "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/bundle.yaml" | \
+            sed 's/namespace: default/namespace: monitoring/g' | \
+            kubectl apply --server-side -f -
 
         # Wait for operator
         info "Waiting for Prometheus Operator to be ready..."
-        kubectl wait --for=condition=Available deployment/prometheus-operator -n default --timeout=180s
+        kubectl wait --for=condition=Available deployment/prometheus-operator -n monitoring --timeout=180s
 
         # Apply Prometheus instance
         kubectl apply -f k8s/prometheus.yaml
@@ -611,19 +614,19 @@ EOF
 deploy_scenario_controller() {
     info "Deploying scenario controller..."
 
-    # Create ConfigMap with Python code
+    # Deploy RBAC and deployment first (ConfigMap in YAML is just a placeholder)
+    kubectl apply -f k8s/scenario-controller.yaml
+
+    # Overwrite the placeholder ConfigMap with real Python code
     kubectl create configmap scenario-controller-code \
         --from-file=scenario_controller.py \
         --from-file=node.py \
         --from-file=vm_manager.py \
-        -n default \
+        -n simulation \
         --dry-run=client -o yaml | kubectl apply -f -
 
-    info "Deploying scenario controller deployment..."
-    kubectl apply -f k8s/scenario-controller.yaml
-
     info "Waiting for scenario controller to be ready..."
-    kubectl wait --for=condition=Available deployment/scenario-controller -n default --timeout=120s
+    kubectl wait --for=condition=Available deployment/scenario-controller -n simulation --timeout=120s
 }
 
 verify_installation() {
@@ -655,7 +658,7 @@ verify_installation() {
 
     echo ""
     info "Scenario controller:"
-    kubectl get pods -l app=scenario-controller
+    kubectl get pods -l app=scenario-controller -n simulation
 
     echo ""
     info "VirtualMachines:"
@@ -717,7 +720,7 @@ print_access_info() {
     echo "  kubectl apply -f k8s/example-scenario-simple.yaml  # Run simple scenario"
     echo "  kubectl apply -f k8s/example-scenario-node-aware.yaml  # Run node-aware scenario"
     echo "  kubectl describe scenario <name>   # Get scenario status"
-    echo "  kubectl logs -l app=scenario-controller -f  # Watch scenario execution"
+    echo "  kubectl logs -l app=scenario-controller -n simulation -f  # Watch scenario execution"
     echo ""
     info "Test eviction webhook (triggers live migration):"
     echo "  kubectl delete pod <virt-launcher-pod-name>"

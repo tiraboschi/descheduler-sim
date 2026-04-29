@@ -11,6 +11,7 @@ Watches SimulationScenario CRs and executes them by:
 
 import time
 import logging
+import math
 import threading
 import random
 import json
@@ -83,7 +84,13 @@ def sample_from_distribution(config: Dict[str, Any]) -> float:
         return max(min_val, min(max_val, value))
     elif dist_type == 'poisson':
         lambda_val = float(config.get('lambda', 1.0))
-        return min(max_val, random.poisson(lambda_val))
+        # Knuth's algorithm for Poisson sampling (no numpy required)
+        L = math.exp(-lambda_val)
+        k, p = 0, 1.0
+        while p > L:
+            k += 1
+            p *= random.random()
+        return min(max_val, k - 1)
 
     return min_val
 
@@ -445,8 +452,10 @@ class ScenarioExecutor:
                 return vm_pool.get('vms', [])
 
         elif strategy == 'nodeAware':
-            node_selector_config = assignment.get('nodeSelector', {})
-            nodes = self.node_selector.select_nodes(node_selector_config, self.namespace)
+            selector_ref = assignment.get('nodeSelector', {})
+            if isinstance(selector_ref, str):
+                selector_ref = self.spec.get('nodeSelectors', {}).get(selector_ref, {})
+            nodes = self.node_selector.select_nodes(selector_ref, self.namespace)
 
             # Get VMs on selected nodes
             target_vms = []
@@ -570,31 +579,34 @@ class ScenarioController:
         """Main controller loop."""
         logger.info("Starting Simulation Scenario Controller")
 
-        w = watch.Watch()
+        while True:
+            w = watch.Watch()
+            try:
+                for event in w.stream(
+                    self.custom_api.list_namespaced_custom_object,
+                    group="simulation.node-classifier.io",
+                    version="v1alpha1",
+                    namespace=self.namespace,
+                    plural="simulationscenarios"
+                ):
+                    event_type = event['type']
+                    scenario = event['object']
+                    name = scenario['metadata']['name']
 
-        try:
-            for event in w.stream(
-                self.custom_api.list_namespaced_custom_object,
-                group="simulation.node-classifier.io",
-                version="v1alpha1",
-                namespace=self.namespace,
-                plural="simulationscenarios"
-            ):
-                event_type = event['type']
-                scenario = event['object']
-                name = scenario['metadata']['name']
+                    logger.info(f"Event {event_type} for scenario {name}")
 
-                logger.info(f"Event {event_type} for scenario {name}")
+                    if event_type == 'ADDED':
+                        self._handle_added(name, scenario)
+                    elif event_type == 'MODIFIED':
+                        self._handle_modified(name, scenario)
+                    elif event_type == 'DELETED':
+                        self._handle_deleted(name)
 
-                if event_type == 'ADDED':
-                    self._handle_added(name, scenario)
-                elif event_type == 'MODIFIED':
-                    self._handle_modified(name, scenario)
-                elif event_type == 'DELETED':
-                    self._handle_deleted(name)
+            except Exception as e:
+                logger.error(f"Controller error: {e}", exc_info=True)
 
-        except Exception as e:
-            logger.error(f"Controller error: {e}", exc_info=True)
+            logger.info("Watch stream ended, restarting in 5s...")
+            time.sleep(5)
 
     def _handle_added(self, name: str, scenario: Dict[str, Any]):
         """Handle new scenario."""
