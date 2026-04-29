@@ -225,9 +225,10 @@ class ExporterState:
 
     def update_node_metrics(self, node_name: str):
         """Update Prometheus metrics for a node by reading pod annotations."""
+        # Calculate metrics from pods OUTSIDE the lock (K8s API call can be slow)
+        metrics = self._calculate_node_metrics_from_pods(node_name)
+
         with self.lock:
-            # Try to calculate metrics from pods
-            metrics = self._calculate_node_metrics_from_pods(node_name)
 
             if metrics:
                 # Get current time for counter calculations
@@ -338,11 +339,13 @@ class ExporterState:
             for node in nodes:
                 self.nodes[node.name] = node
 
-            logger.info(f"Loaded scenario with {len(nodes)} nodes (read-only)")
+        logger.info(f"Loaded scenario with {len(nodes)} nodes (read-only)")
 
-            # Update metrics for all nodes
+        # Seed Prometheus metrics from scenario initial values (no K8s API call needed here)
+        # The next /metrics scrape will refresh from actual pod annotations
+        with self.lock:
             for node in nodes:
-                self.update_node_metrics(node.name)
+                self._update_prometheus_metrics_from_node(node)
 
     def move_vm(self, vm_id: str, from_node: str, to_node: str) -> bool:
         """
