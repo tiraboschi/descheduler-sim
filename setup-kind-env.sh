@@ -700,10 +700,12 @@ print_access_info() {
     echo "  ✓ Metrics Exporter"
     echo "  ✓ Eviction Webhook (KubeVirt-style)"
     echo "  ✓ Scenario Controller"
+    echo "  ✓ Perses Dashboard"
     echo ""
     info "Access endpoints:"
     echo "  Prometheus:       http://localhost:9090"
     echo "  Metrics Exporter: http://localhost:8001"
+    echo "  Perses:           http://localhost:8085"
     echo ""
     info "Test connectivity:"
     echo "  curl http://localhost:8001/health"
@@ -737,6 +739,13 @@ print_access_info() {
     echo ""
 }
 
+deploy_perses() {
+    info "Deploying Perses dashboard..."
+    kubectl apply -f k8s/perses.yaml
+    info "Waiting for Perses to be ready..."
+    kubectl wait --for=condition=Available deployment/perses -n monitoring --timeout=120s
+}
+
 create_example_vms() {
     info "Creating example VirtualMachines..."
 
@@ -768,6 +777,7 @@ main() {
     build_and_deploy_exporter
     deploy_eviction_webhook
     deploy_scenario_controller
+    deploy_perses
     create_example_vms
     verify_installation
     print_access_info

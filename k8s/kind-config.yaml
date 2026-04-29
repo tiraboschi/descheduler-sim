@@ -20,3 +20,7 @@ nodes:
       - containerPort: 30800
         hostPort: 8001
         protocol: TCP
+      # Perses dashboard
+      - containerPort: 30085
+        hostPort: 8085
+        protocol: TCP
