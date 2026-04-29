@@ -174,7 +174,7 @@ info "Test 7: Checking VirtualMachines and VM controller..."
 VM_COUNT=$(kubectl get vm 2>/dev/null | grep -c "^vm-" || echo 0)
 info "Found $VM_COUNT VirtualMachines"
 
-VM_CONTROLLER_READY=$(kubectl get pods -l app=vm-controller -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
+VM_CONTROLLER_READY=$(kubectl get pods -l app=vm-controller -n monitoring -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
 
 if [ "$VM_CONTROLLER_READY" = "Running" ]; then
     info "✓ VM Controller is running"
@@ -182,7 +182,7 @@ else
     warn "VM Controller not running yet (phase: $VM_CONTROLLER_READY)"
 fi
 
-EVICTION_WEBHOOK_READY=$(kubectl get pods -l app=eviction-webhook -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
+EVICTION_WEBHOOK_READY=$(kubectl get pods -l app=eviction-webhook -n monitoring -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
 
 if [ "$EVICTION_WEBHOOK_READY" = "Running" ]; then
     info "✓ Eviction Webhook is running"
