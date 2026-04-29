@@ -126,6 +126,7 @@ metadata:
   namespace: monitoring
   labels:
     app: metrics-exporter
+    prometheus: kube-prometheus
 spec:
   selector:
     matchLabels:

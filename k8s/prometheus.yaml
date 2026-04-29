@@ -58,7 +58,7 @@ spec:
   serviceAccountName: prometheus
   serviceMonitorSelector:
     matchLabels:
-      app: metrics-exporter
+      prometheus: kube-prometheus
   ruleSelector:
     matchLabels:
       prometheus: kube-prometheus

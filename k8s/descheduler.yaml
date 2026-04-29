@@ -414,3 +414,44 @@ spec:
           emptyDir: {}
         - name: nginx-run
           emptyDir: {}
+---
+# Service so Prometheus can reach the descheduler metrics endpoint (port 10258, HTTPS)
+apiVersion: v1
+kind: Service
+metadata:
+  name: descheduler
+  namespace: kube-descheduler
+  labels:
+    app: descheduler
+spec:
+  selector:
+    app: descheduler
+  ports:
+    - name: metrics
+      port: 10258
+      targetPort: 10258
+      protocol: TCP
+---
+# ServiceMonitor lives in monitoring namespace (where Prometheus watches by default).
+# namespaceSelector targets the Service in kube-descheduler.
+# insecureSkipVerify because the descheduler uses a self-signed serving cert.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: descheduler
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - kube-descheduler
+  selector:
+    matchLabels:
+      app: descheduler
+  endpoints:
+    - port: metrics
+      interval: 15s
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
