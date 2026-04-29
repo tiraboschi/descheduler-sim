@@ -6,6 +6,7 @@ metadata:
   namespace: monitoring
   labels:
     prometheus: kube-prometheus
+    role: alert-rules
 spec:
   groups:
     - name: recordingRules.rules

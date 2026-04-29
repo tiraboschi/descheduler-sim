@@ -99,7 +99,13 @@ memory_available_gauge = Gauge(
     registry=registry
 )
 
-# Removed kube_node_status_allocatable - provided by kube-state-metrics
+# kube-state-metrics compatible allocatable metric (kube-state-metrics not deployed in sim)
+node_allocatable_gauge = Gauge(
+    'kube_node_status_allocatable',
+    'Amount of resource allocatable for pods excluding overhead',
+    ['node', 'resource', 'unit'],
+    registry=registry
+)
 
 # Node role label metric (kube-state-metrics style)
 node_role_gauge = Gauge(
@@ -275,6 +281,9 @@ class ExporterState:
                 node_memory_bytes = 128 * 1024 ** 3  # 128 GiB
                 memory_available_bytes = node_memory_bytes * (1.0 - metrics["memory_usage"])
                 memory_available_gauge.labels(instance=node_name).set(memory_available_bytes)
+
+                # kube-state-metrics compatible allocatable metric
+                node_allocatable_gauge.labels(node=node_name, resource='memory', unit='byte').set(node_memory_bytes)
 
                 # Set node role (always set, not incremented)
                 node_role_gauge.labels(node=node_name, role='worker', instance=node_name).set(1)
