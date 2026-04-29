@@ -24,11 +24,11 @@ spec:
 status:
   allocatable:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   capacity:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   conditions:
     - lastHeartbeatTime: "2024-01-01T00:00:00Z"
@@ -94,11 +94,11 @@ spec:
 status:
   allocatable:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   capacity:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   conditions:
     - lastHeartbeatTime: "2024-01-01T00:00:00Z"
@@ -164,11 +164,11 @@ spec:
 status:
   allocatable:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   capacity:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   conditions:
     - lastHeartbeatTime: "2024-01-01T00:00:00Z"
@@ -234,11 +234,11 @@ spec:
 status:
   allocatable:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   capacity:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   conditions:
     - lastHeartbeatTime: "2024-01-01T00:00:00Z"
@@ -304,11 +304,11 @@ spec:
 status:
   allocatable:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   capacity:
     cpu: "32"
-    memory: 128Gi
+    memory: 512Gi
     pods: "110"
   conditions:
     - lastHeartbeatTime: "2024-01-01T00:00:00Z"

@@ -55,6 +55,14 @@ spec:
                     description: Memory utilization ratio relative to allocated memory (e.g., "0.8" = 80% of allocated memory)
                     pattern: '^0\.\d+$|^1\.0+$'
                     default: "0.8"
+              migration:
+                type: object
+                description: Live migration characteristics
+                properties:
+                  dirtyRateMbps:
+                    type: number
+                    description: "Memory dirty rate in Mbps (megabits/s). Governs pre-copy convergence time. Idle ~50, regular ~800, busy ~4000, very busy ~8000."
+                    default: 800
               running:
                 type: boolean
                 description: Whether the VM should be running

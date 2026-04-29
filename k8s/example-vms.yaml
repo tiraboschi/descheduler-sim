@@ -2,6 +2,7 @@
 # Example VirtualMachine CRs for testing
 # Resource allocation: CPU cores and memory (what VM has)
 # Utilization: How much of allocated resources are actually used (for simulation)
+# Node size: 512 GiB RAM, 32 CPU cores, 10 Gbps network
 
 apiVersion: simulation.node-classifier.io/v1alpha1
 kind: VirtualMachine
@@ -9,14 +10,16 @@ metadata:
   name: vm-small-1
   namespace: default
   annotations:
-    description: "Small VM: 1 core, 2Gi memory, 15% CPU util, 60% memory util"
+    description: "Small VM: 1 core, 8Gi memory, 15% CPU util, 60% memory util"
 spec:
   resources:
     cpu: "1"         # 1 CPU core
-    memory: "2Gi"    # 2GiB memory
+    memory: "8Gi"    # 8GiB memory
   utilization:
     cpu: "0.15"      # Using 15% of allocated CPU (0.15 cores)
-    memory: "0.6"    # Using 60% of allocated memory (1.2Gi)
+    memory: "0.6"    # Using 60% of allocated memory (4.8Gi)
+  migration:
+    dirtyRateMbps: 50    # Idle workload
   running: true
 
 ---
@@ -26,14 +29,16 @@ metadata:
   name: vm-medium-1
   namespace: default
   annotations:
-    description: "Medium VM: 2 cores, 4Gi memory, 18% CPU util, 80% memory util"
+    description: "Medium VM: 2 cores, 16Gi memory, 18% CPU util, 80% memory util"
 spec:
   resources:
     cpu: "2"         # 2 CPU cores
-    memory: "4Gi"    # 4GiB memory
+    memory: "16Gi"   # 16GiB memory
   utilization:
     cpu: "0.18"      # Using 18% of allocated CPU (0.36 cores)
-    memory: "0.8"    # Using 80% of allocated memory (3.2Gi)
+    memory: "0.8"    # Using 80% of allocated memory (12.8Gi)
+  migration:
+    dirtyRateMbps: 800   # Regular workload
   running: true
 
 ---
@@ -43,14 +48,16 @@ metadata:
   name: vm-large-1
   namespace: default
   annotations:
-    description: "Large VM: 4 cores, 8Gi memory, 12% CPU util, 75% memory util"
+    description: "Large VM: 4 cores, 32Gi memory, 12% CPU util, 75% memory util"
 spec:
   resources:
     cpu: "4"         # 4 CPU cores
-    memory: "8Gi"    # 8GiB memory
+    memory: "32Gi"   # 32GiB memory
   utilization:
     cpu: "0.12"      # Using 12% of allocated CPU (0.48 cores)
-    memory: "0.75"   # Using 75% of allocated memory (6Gi)
+    memory: "0.75"   # Using 75% of allocated memory (24Gi)
+  migration:
+    dirtyRateMbps: 4000  # Busy workload
   running: true
 
 ---
@@ -60,14 +67,16 @@ metadata:
   name: vm-compute-intensive
   namespace: default
   annotations:
-    description: "CPU-allocated VM: 8 cores, 4Gi memory, 20% CPU util"
+    description: "CPU-allocated VM: 8 cores, 16Gi memory, 20% CPU util"
 spec:
   resources:
     cpu: "8"         # 8 CPU cores
-    memory: "4Gi"    # 4GiB memory
+    memory: "16Gi"   # 16GiB memory
   utilization:
     cpu: "0.2"       # Using 20% of allocated CPU (1.6 cores)
-    memory: "0.5"    # Using 50% of allocated memory (2Gi)
+    memory: "0.5"    # Using 50% of allocated memory (8Gi)
+  migration:
+    dirtyRateMbps: 8000  # Really busy: compute-intensive workload hammering memory
   running: true
 
 ---
@@ -77,14 +86,16 @@ metadata:
   name: vm-memory-intensive
   namespace: default
   annotations:
-    description: "Memory-allocated VM: 2 cores, 16Gi memory, 70% memory util"
+    description: "Memory-allocated VM: 2 cores, 64Gi memory, 70% memory util"
 spec:
   resources:
     cpu: "2"         # 2 CPU cores
-    memory: "16Gi"   # 16GiB memory
+    memory: "64Gi"   # 64GiB memory
   utilization:
     cpu: "0.15"      # Using 15% of allocated CPU (0.3 cores)
-    memory: "0.7"    # Using 70% of allocated memory (11.2Gi)
+    memory: "0.7"    # Using 70% of allocated memory (44.8Gi)
+  migration:
+    dirtyRateMbps: 800   # Regular: memory-intensive but mostly reading, not writing
   running: true
 
 ---
@@ -94,14 +105,14 @@ metadata:
   name: vm-fractional
   namespace: default
   annotations:
-    description: "Small VM with fractional CPU: 0.5 cores, 1Gi memory"
+    description: "Small VM with fractional CPU: 0.5 cores, 4Gi memory"
 spec:
   resources:
     cpu: "0.5"       # 0.5 CPU cores (500 millicores)
-    memory: "1Gi"    # 1GiB memory
+    memory: "4Gi"    # 4GiB memory
   utilization:
     cpu: "0.16"      # Using 16% of allocated CPU (0.08 cores)
-    memory: "0.7"    # Using 70% of allocated memory (0.7Gi)
+    memory: "0.7"    # Using 70% of allocated memory (2.8Gi)
   running: true
 
 ---
@@ -111,11 +122,11 @@ metadata:
   name: vm-idle-01
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 1Gi memory, minimal utilization"
+    description: "Idle VM: 1 core, 4Gi memory, minimal utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "1Gi"
+    memory: "4Gi"
   utilization:
     cpu: "0.1"       # 10% CPU utilization
     memory: "0.5"    # 50% memory utilization
@@ -128,11 +139,11 @@ metadata:
   name: vm-idle-02
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 2Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.11"      # 11% CPU utilization
     memory: "0.55"   # 55% memory utilization
@@ -145,11 +156,11 @@ metadata:
   name: vm-idle-03
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 4Gi memory, low utilization"
+    description: "Idle VM: 1 core, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.12"      # 12% CPU utilization
     memory: "0.6"    # 60% memory utilization
@@ -162,11 +173,11 @@ metadata:
   name: vm-idle-04
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.13"      # 13% CPU utilization
     memory: "0.65"   # 65% memory utilization
@@ -179,11 +190,11 @@ metadata:
   name: vm-idle-05
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 8Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 32Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "8Gi"
+    memory: "32Gi"
   utilization:
     cpu: "0.14"      # 14% CPU utilization
     memory: "0.7"    # 70% memory utilization
@@ -196,11 +207,11 @@ metadata:
   name: vm-idle-06
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 6Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 24Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "6Gi"
+    memory: "24Gi"
   utilization:
     cpu: "0.15"      # 15% CPU utilization
     memory: "0.75"   # 75% memory utilization
@@ -213,11 +224,11 @@ metadata:
   name: vm-idle-07
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 2Gi memory, low utilization"
+    description: "Idle VM: 1 core, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.16"      # 16% CPU utilization
     memory: "0.8"    # 80% memory utilization
@@ -230,11 +241,11 @@ metadata:
   name: vm-idle-08
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 3Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.17"      # 17% CPU utilization
     memory: "0.6"    # 60% memory utilization
@@ -247,11 +258,11 @@ metadata:
   name: vm-idle-09
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 8Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 32Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "8Gi"
+    memory: "32Gi"
   utilization:
     cpu: "0.18"      # 18% CPU utilization
     memory: "0.7"    # 70% memory utilization
@@ -264,11 +275,11 @@ metadata:
   name: vm-idle-10
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 2Gi memory, low utilization"
+    description: "Idle VM: 1 core, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.19"      # 19% CPU utilization
     memory: "0.65"   # 65% memory utilization
@@ -281,11 +292,11 @@ metadata:
   name: vm-idle-11
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 3Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.10"
     memory: "0.55"
@@ -298,11 +309,11 @@ metadata:
   name: vm-idle-12
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 1Gi memory, low utilization"
+    description: "Idle VM: 1 core, 4Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "1Gi"
+    memory: "4Gi"
   utilization:
     cpu: "0.11"
     memory: "0.60"
@@ -315,11 +326,11 @@ metadata:
   name: vm-idle-13
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.12"
     memory: "0.65"
@@ -332,11 +343,11 @@ metadata:
   name: vm-idle-14
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 2Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.13"
     memory: "0.70"
@@ -349,11 +360,11 @@ metadata:
   name: vm-idle-15
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 6Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 24Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "6Gi"
+    memory: "24Gi"
   utilization:
     cpu: "0.14"
     memory: "0.75"
@@ -366,11 +377,11 @@ metadata:
   name: vm-idle-16
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 2Gi memory, low utilization"
+    description: "Idle VM: 1 core, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.15"
     memory: "0.50"
@@ -383,11 +394,11 @@ metadata:
   name: vm-idle-17
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.16"
     memory: "0.55"
@@ -400,11 +411,11 @@ metadata:
   name: vm-idle-18
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 3Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.17"
     memory: "0.60"
@@ -417,11 +428,11 @@ metadata:
   name: vm-idle-19
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 1Gi memory, low utilization"
+    description: "Idle VM: 1 core, 4Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "1Gi"
+    memory: "4Gi"
   utilization:
     cpu: "0.18"
     memory: "0.65"
@@ -434,11 +445,11 @@ metadata:
   name: vm-idle-20
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 8Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 32Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "8Gi"
+    memory: "32Gi"
   utilization:
     cpu: "0.19"
     memory: "0.70"
@@ -451,11 +462,11 @@ metadata:
   name: vm-idle-21
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 2Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.20"
     memory: "0.75"
@@ -468,11 +479,11 @@ metadata:
   name: vm-idle-22
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 3Gi memory, low utilization"
+    description: "Idle VM: 1 core, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.10"
     memory: "0.50"
@@ -485,11 +496,11 @@ metadata:
   name: vm-idle-23
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 6Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 24Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "6Gi"
+    memory: "24Gi"
   utilization:
     cpu: "0.11"
     memory: "0.55"
@@ -502,11 +513,11 @@ metadata:
   name: vm-idle-24
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.12"
     memory: "0.60"
@@ -519,11 +530,11 @@ metadata:
   name: vm-idle-25
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.13"
     memory: "0.65"
@@ -536,11 +547,11 @@ metadata:
   name: vm-idle-26
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 2Gi memory, low utilization"
+    description: "Idle VM: 1 core, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.14"
     memory: "0.70"
@@ -553,11 +564,11 @@ metadata:
   name: vm-idle-27
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 3Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.15"
     memory: "0.75"
@@ -570,11 +581,11 @@ metadata:
   name: vm-idle-28
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.16"
     memory: "0.50"
@@ -587,11 +598,11 @@ metadata:
   name: vm-idle-29
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 1Gi memory, low utilization"
+    description: "Idle VM: 1 core, 4Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "1Gi"
+    memory: "4Gi"
   utilization:
     cpu: "0.17"
     memory: "0.55"
@@ -604,11 +615,11 @@ metadata:
   name: vm-idle-30
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 6Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 24Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "6Gi"
+    memory: "24Gi"
   utilization:
     cpu: "0.18"
     memory: "0.60"
@@ -621,11 +632,11 @@ metadata:
   name: vm-idle-31
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 2Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.19"
     memory: "0.65"
@@ -638,11 +649,11 @@ metadata:
   name: vm-idle-32
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 3Gi memory, low utilization"
+    description: "Idle VM: 1 core, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.20"
     memory: "0.70"
@@ -655,11 +666,11 @@ metadata:
   name: vm-idle-33
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 8Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 32Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "8Gi"
+    memory: "32Gi"
   utilization:
     cpu: "0.10"
     memory: "0.75"
@@ -672,11 +683,11 @@ metadata:
   name: vm-idle-34
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.11"
     memory: "0.50"
@@ -689,11 +700,11 @@ metadata:
   name: vm-idle-35
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 4Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.12"
     memory: "0.55"
@@ -706,11 +717,11 @@ metadata:
   name: vm-idle-36
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 2Gi memory, low utilization"
+    description: "Idle VM: 1 core, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.13"
     memory: "0.60"
@@ -723,11 +734,11 @@ metadata:
   name: vm-idle-37
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 3Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.14"
     memory: "0.65"
@@ -740,11 +751,11 @@ metadata:
   name: vm-idle-38
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 6Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 24Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "6Gi"
+    memory: "24Gi"
   utilization:
     cpu: "0.15"
     memory: "0.70"
@@ -757,11 +768,11 @@ metadata:
   name: vm-idle-39
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 1Gi memory, low utilization"
+    description: "Idle VM: 1 core, 4Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "1Gi"
+    memory: "4Gi"
   utilization:
     cpu: "0.16"
     memory: "0.75"
@@ -774,11 +785,11 @@ metadata:
   name: vm-idle-40
   namespace: default
   annotations:
-    description: "Idle VM: 4 cores, 8Gi memory, low utilization"
+    description: "Idle VM: 4 cores, 32Gi memory, low utilization"
 spec:
   resources:
     cpu: "4"
-    memory: "8Gi"
+    memory: "32Gi"
   utilization:
     cpu: "0.17"
     memory: "0.50"
@@ -791,11 +802,11 @@ metadata:
   name: vm-idle-41
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 2Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 8Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "2Gi"
+    memory: "8Gi"
   utilization:
     cpu: "0.18"
     memory: "0.55"
@@ -808,11 +819,11 @@ metadata:
   name: vm-idle-42
   namespace: default
   annotations:
-    description: "Idle VM: 1 core, 4Gi memory, low utilization"
+    description: "Idle VM: 1 core, 16Gi memory, low utilization"
 spec:
   resources:
     cpu: "1"
-    memory: "4Gi"
+    memory: "16Gi"
   utilization:
     cpu: "0.19"
     memory: "0.60"
@@ -825,11 +836,11 @@ metadata:
   name: vm-idle-43
   namespace: default
   annotations:
-    description: "Idle VM: 3 cores, 3Gi memory, low utilization"
+    description: "Idle VM: 3 cores, 12Gi memory, low utilization"
 spec:
   resources:
     cpu: "3"
-    memory: "3Gi"
+    memory: "12Gi"
   utilization:
     cpu: "0.20"
     memory: "0.65"
@@ -842,11 +853,11 @@ metadata:
   name: vm-idle-44
   namespace: default
   annotations:
-    description: "Idle VM: 2 cores, 6Gi memory, low utilization"
+    description: "Idle VM: 2 cores, 24Gi memory, low utilization"
 spec:
   resources:
     cpu: "2"
-    memory: "6Gi"
+    memory: "24Gi"
   utilization:
     cpu: "0.10"
     memory: "0.70"

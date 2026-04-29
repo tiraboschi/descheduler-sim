@@ -32,6 +32,10 @@ spec:
                   type: number
                   description: "Schedule playback speed (1.0=real-time, 60.0=60x faster). Only affects scenario event generation, not Prometheus/descheduler timing."
                   default: 1.0
+                networkBandwidthMbps:
+                  type: number
+                  description: "Total network bandwidth for live migrations between nodes, in Mbps (megabits/s). Shared across concurrent migrations. 10000 Mbps = 10 Gbps."
+                  default: 10000
                 vmPools:
                   type: object
                   description: "Named groups of VMs for selection"
@@ -145,6 +149,9 @@ spec:
                             type: number
                           memory:
                             type: number
+                      dirtyRateMbps:
+                        type: number
+                        description: "Memory dirty rate in Mbps (megabits/s). Idle ~50, regular ~800, busy ~4000, very busy ~8000. Default: 800."
                 timeline:
                   type: array
                   description: "Scheduled events at specific times"
