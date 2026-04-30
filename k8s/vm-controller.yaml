@@ -25,6 +25,10 @@ rules:
 - apiGroups: ["simulation.node-classifier.io"]
   resources: ["virtualmachines/status"]
   verbs: ["get", "update", "patch"]
+# Manage VirtualMachineInstance CRs (created when pod is first placed)
+- apiGroups: ["kubevirt.io"]
+  resources: ["virtualmachineinstances"]
+  verbs: ["get", "list", "watch", "create", "delete"]
 
 ---
 # ClusterRoleBinding for the VM controller

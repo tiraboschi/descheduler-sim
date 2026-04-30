@@ -372,6 +372,125 @@ data:
                 }
               ]
             }
+          },
+          "kubevirtCooldownBlocksStat": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "Cooldown Blocks (total)",
+                "description": "Total virt-launcher evictions deferred by the PreEvictionFilter because the VMI completed a migration within the configured cooldown window. Resets when the descheduler restarts."
+              },
+              "plugin": {
+                "kind": "StatChart",
+                "spec": {"calculation": "last-number", "format": {"unit": "decimal", "decimalPlaces": 0}}
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_kubevirt_eviction_blocks_total{reason=\"cooldown\"})", "seriesNameFormat": "Cooldown blocks"}}}
+                }
+              ]
+            }
+          },
+          "kubevirtInflightBlocksStat": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "In-flight Migration Blocks (total)",
+                "description": "Total virt-launcher evictions hard-blocked by the Filter because the VMI was still mid-migration (startTimestamp set, endTimestamp absent). Resets when the descheduler restarts."
+              },
+              "plugin": {
+                "kind": "StatChart",
+                "spec": {"calculation": "last-number", "format": {"unit": "decimal", "decimalPlaces": 0}}
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_kubevirt_eviction_blocks_total{reason=\"migration_in_progress\"})", "seriesNameFormat": "In-flight blocks"}}}
+                }
+              ]
+            }
+          },
+          "kubevirtBlocksByReason": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "Eviction Block Rate — by Reason",
+                "description": "Rate of eviction deferrals per minute. 'cooldown' (PreEvictionFilter) fires when a VM migrated recently and is still within its adaptive protection window. 'migration_in_progress' (Filter) fires when the VMI is still mid-flight. A sustained 'cooldown' signal means the descheduler is being held back from re-evicting VMs it just moved — exactly the protection the plugin is designed to provide."
+              },
+              "plugin": {
+                "kind": "TimeSeriesChart",
+                "spec": {
+                  "legend": {"position": "right", "mode": "table", "values": ["last"]},
+                  "yAxis": {"label": "Blocks / min", "format": {"unit": "decimal", "decimalPlaces": 2}, "min": 0},
+                  "visual": {"display": "line", "lineWidth": 2, "areaOpacity": 0.3}
+                }
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{reason=\"cooldown\", node=~\"$node\"}[5m])) * 60", "seriesNameFormat": "cooldown (PreEvictionFilter)"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{reason=\"migration_in_progress\", node=~\"$node\"}[5m])) * 60", "seriesNameFormat": "migration in progress (Filter)"}}}
+                }
+              ]
+            }
+          },
+          "kubevirtBlocksByNode": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "Eviction Block Rate — by Node",
+                "description": "Rate of eviction deferrals per minute split by the source node of the blocked virt-launcher pod. A persistently high value for a specific node means the descheduler keeps identifying it as overloaded and targeting its VMs, but they are all still within their cooldown windows — a sign of a chronic hotspot the plugin is actively protecting against churn."
+              },
+              "plugin": {
+                "kind": "TimeSeriesChart",
+                "spec": {
+                  "legend": {"position": "right", "mode": "table", "values": ["last"]},
+                  "yAxis": {"label": "Blocks / min", "format": {"unit": "decimal", "decimalPlaces": 2}, "min": 0},
+                  "visual": {"display": "line", "lineWidth": 2, "areaOpacity": 0.15}
+                }
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{node=~\"$node\"}[5m])) by (node) * 60", "seriesNameFormat": "{{node}}"}}}
+                }
+              ]
+            }
+          },
+          "kubevirtCooldownQuantiles": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "Effective Cooldown Duration — p50 / p90 / p99",
+                "description": "Distribution of the adaptive cooldown applied when an eviction is deferred. Base cooldown is max(configured 15 min, migration duration). For each additional migration recorded within the 24-hour history window the base is doubled (exponential backoff), capped at 6 hours. When p99 >> p50 some VMs have been migrated multiple times and are receiving progressively longer protection — the plugin is suppressing oscillation."
+              },
+              "plugin": {
+                "kind": "TimeSeriesChart",
+                "spec": {
+                  "legend": {"position": "right", "mode": "table", "values": ["last"]},
+                  "yAxis": {"label": "Cooldown Duration", "format": {"unit": "seconds"}, "min": 0},
+                  "visual": {"display": "line", "lineWidth": 2, "areaOpacity": 0.1}
+                }
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "histogram_quantile(0.50, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le))", "seriesNameFormat": "p50"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "histogram_quantile(0.90, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le))", "seriesNameFormat": "p90"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "histogram_quantile(0.99, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le))", "seriesNameFormat": "p99"}}}
+                }
+              ]
+            }
           }
         },
         "layouts": [
@@ -422,6 +541,19 @@ data:
                 {"x": 4, "y": 0, "width": 20, "height": 8, "content": {"$ref": "#/spec/panels/evictionsTimeSeries"}},
                 {"x": 0, "y": 8, "width": 24, "height": 8, "content": {"$ref": "#/spec/panels/evictionsRate"}},
                 {"x": 0, "y": 16, "width": 24, "height": 10, "content": {"$ref": "#/spec/panels/evictionHistory"}}
+              ]
+            }
+          },
+          {
+            "kind": "Grid",
+            "spec": {
+              "display": {"title": "KubevirtMigrationAware — Live Migration Protection", "collapse": {"open": true}},
+              "items": [
+                {"x": 0, "y": 0, "width": 6, "height": 4, "content": {"$ref": "#/spec/panels/kubevirtCooldownBlocksStat"}},
+                {"x": 0, "y": 4, "width": 6, "height": 4, "content": {"$ref": "#/spec/panels/kubevirtInflightBlocksStat"}},
+                {"x": 6, "y": 0, "width": 18, "height": 8, "content": {"$ref": "#/spec/panels/kubevirtBlocksByReason"}},
+                {"x": 0, "y": 8, "width": 12, "height": 10, "content": {"$ref": "#/spec/panels/kubevirtBlocksByNode"}},
+                {"x": 12, "y": 8, "width": 12, "height": 10, "content": {"$ref": "#/spec/panels/kubevirtCooldownQuantiles"}}
               ]
             }
           }

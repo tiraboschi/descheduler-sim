@@ -1,0 +1,55 @@
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: SimulationScenario
+metadata:
+  name: cooldown-demo
+  namespace: default
+spec:
+  duration: 20m
+  timeScale: 1.0
+  networkBandwidthMbps: 5000  # 5 Gbps - realistic; slows migrations enough to occasionally catch mid-flight
+
+  nodeSelectors:
+    hottest:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+
+  taskTypes:
+    sustained-burst:
+      resources:
+        # High CPU + memory together drive both dimensions of the
+        # MetricResource distance formula, ensuring the hottest node
+        # lands well above the deviation threshold even at MetricResource: 10.
+        cpu: {min: 0.70, max: 0.90, distribution: uniform}
+        memory: {min: 0.35, max: 0.55, distribution: uniform}
+      # Tasks last 7-9 minutes: longer than the descheduler cycle (60s) so load
+      # accumulates on the hot node, and longer than a single cooldown check
+      # window so migrated VMs remain "hot" when the descheduler finds their
+      # new node.
+      duration: {min: 420, max: 540, mean: 480}
+
+  taskGenerators:
+    # Every 90s: fire 4 burst tasks across 3-5 VMs on the hottest node.
+    #
+    # The heat-and-chase dynamic:
+    #   1. Hottest node is targeted → 3-5 VMs are candidate targets
+    #   2. 4 burst tasks are spread across those VMs (high CPU + memory)
+    #   3. Node MetricResource score spikes above the deviation threshold
+    #   4. Descheduler (60s cycle) requests evictions → VMs live-migrate
+    #   5. Migrated VMs carry their high utilization to the destination node
+    #   6. That node becomes the new hottest → scenario piles more load onto it
+    #   7. Descheduler tries to evict the same VMs again within 15 minutes
+    #   8. KubevirtMigrationAware PreEvictionFilter: cooldown not expired → BLOCK
+    - name: heat-and-chase
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 90s
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest
+        vmSelection:
+          count: {min: 3, max: 5}
+          strategy: random
+      taskType: sustained-burst
+      rate: {value: 4}

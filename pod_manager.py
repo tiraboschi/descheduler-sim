@@ -8,6 +8,7 @@ reporting fake memory and CPU consumption values.
 """
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 import random
 import string
@@ -16,6 +17,10 @@ import threading
 import time
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
+
+_VMI_GROUP = "kubevirt.io"
+_VMI_VERSION = "v1"
+_VMI_PLURAL = "virtualmachineinstances"
 
 from node import VM
 from vm_manager import VMManager
@@ -83,6 +88,7 @@ class PodManager:
             else:
                 config.load_kube_config()
             self.v1 = client.CoreV1Api()
+            self.custom_api = client.CustomObjectsApi()
             logger.info("Kubernetes client initialized successfully")
 
             # Initialize VM manager if requested
@@ -310,6 +316,7 @@ class PodManager:
 
             pod_name = created_pod.metadata.name
             logger.info(f"✅ Pod {pod_name} created with finalizers: {created_pod.metadata.finalizers}")
+            self._create_vmi(vm.id)
 
             # Update VM with pod reference
             vm.pod_name = pod_name
@@ -366,6 +373,8 @@ class PodManager:
 
             del self.pod_registry[vm_id]
             logger.info(f"Deleted pod {pod_info.pod_name} for VM {vm_id}")
+
+            self._delete_vmi(vm_id)
 
             # Delete VM CR if enabled
             if self.vm_manager:
@@ -668,10 +677,12 @@ class PodManager:
         # Step 3: Pre-copy phase — both pods run simultaneously while memory is transferred
         logger.info(f"   Migration in progress: source on {from_node}, target on {target_node}")
         logger.info(f"   Both pods running simultaneously (pre-copy live migration)")
+        self._set_vmi_migration_start(vm.id)
         with self._migration_lock:
             self._migrations_in_progress[vm.id] = (from_node, target_node)
         try:
             self._simulate_pre_copy_phase(vm, from_node, target_node, target_pod_name)
+            self._set_vmi_migration_end(vm.id)
 
             # Step 4: Delete source pod (migration complete)
             # IMPORTANT: Delete source pod BEFORE updating VM CR
@@ -1003,9 +1014,11 @@ class PodManager:
         # Pre-copy phase — both pods run simultaneously while memory is transferred
         logger.info(f"   Migration in progress: source on {from_node}, target on {target_node}")
         logger.info(f"   Both pods running simultaneously (pre-copy live migration)")
+        self._set_vmi_migration_start(vm.id)
         with self._migration_lock:
             self._migrations_in_progress[vm.id] = (from_node, target_node)
         self._simulate_pre_copy_phase(vm, from_node, target_node, target_pod_name)
+        self._set_vmi_migration_end(vm.id)
 
         # Update VM to point to target pod
         vm.pod_name = target_pod_name
@@ -1069,6 +1082,83 @@ class PodManager:
             return False
         except ApiException as e:
             logger.error(f"Failed to remove finalizer from pod {pod_name}: {e}")
+            return False
+
+    # ========================================================================
+    # VirtualMachineInstance (kubevirt.io/v1) lifecycle helpers
+    # ========================================================================
+
+    def _now_rfc3339(self) -> str:
+        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def _create_vmi(self, vm_id: str) -> bool:
+        """Create a VirtualMachineInstance CR for a VM (idempotent)."""
+        body = {
+            "apiVersion": f"{_VMI_GROUP}/{_VMI_VERSION}",
+            "kind": "VirtualMachineInstance",
+            "metadata": {"name": vm_id, "namespace": self.namespace},
+            "spec": {},
+            "status": {},
+        }
+        try:
+            self.custom_api.create_namespaced_custom_object(
+                group=_VMI_GROUP, version=_VMI_VERSION,
+                namespace=self.namespace, plural=_VMI_PLURAL, body=body,
+            )
+            logger.info(f"Created VMI for {vm_id}")
+            return True
+        except ApiException as e:
+            if e.status == 409:
+                logger.debug(f"VMI {vm_id} already exists")
+                return True
+            logger.warning(f"Failed to create VMI for {vm_id}: {e}")
+            return False
+
+    def _delete_vmi(self, vm_id: str) -> bool:
+        """Delete the VirtualMachineInstance CR for a VM (idempotent)."""
+        try:
+            self.custom_api.delete_namespaced_custom_object(
+                group=_VMI_GROUP, version=_VMI_VERSION,
+                namespace=self.namespace, plural=_VMI_PLURAL, name=vm_id,
+            )
+            logger.info(f"Deleted VMI for {vm_id}")
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                return True
+            logger.warning(f"Failed to delete VMI for {vm_id}: {e}")
+            return False
+
+    def _set_vmi_migration_start(self, vm_id: str) -> bool:
+        """Write startTimestamp and clear endTimestamp on the VMI migrationState."""
+        now = self._now_rfc3339()
+        patch = {"status": {"migrationState": {"startTimestamp": now, "endTimestamp": ""}}}
+        try:
+            self.custom_api.patch_namespaced_custom_object_status(
+                group=_VMI_GROUP, version=_VMI_VERSION,
+                namespace=self.namespace, plural=_VMI_PLURAL,
+                name=vm_id, body=patch,
+            )
+            logger.info(f"VMI {vm_id}: migration started at {now}")
+            return True
+        except ApiException as e:
+            logger.warning(f"Failed to set migration start on VMI {vm_id}: {e}")
+            return False
+
+    def _set_vmi_migration_end(self, vm_id: str) -> bool:
+        """Write endTimestamp on the VMI migrationState."""
+        now = self._now_rfc3339()
+        patch = {"status": {"migrationState": {"endTimestamp": now}}}
+        try:
+            self.custom_api.patch_namespaced_custom_object_status(
+                group=_VMI_GROUP, version=_VMI_VERSION,
+                namespace=self.namespace, plural=_VMI_PLURAL,
+                name=vm_id, body=patch,
+            )
+            logger.info(f"VMI {vm_id}: migration ended at {now}")
+            return True
+        except ApiException as e:
+            logger.warning(f"Failed to set migration end on VMI {vm_id}: {e}")
             return False
 
     def _clear_vm_evacuation_marker(self, vm_id: str) -> bool:

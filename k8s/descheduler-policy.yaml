@@ -18,6 +18,11 @@ data:
     - name: KubeVirtRelieveAndMigrate
       pluginConfig:
       - args:
+          migrationCooldown: 15m
+          maxMigrationCooldown: 6h
+          migrationHistoryWindow: 24h
+        name: KubevirtMigrationAware
+      - args:
           evictableNamespaces:
             exclude:
             - kube-system
@@ -124,9 +129,11 @@ data:
           disabled: null
           enabled:
           - DefaultEvictor
+          - KubevirtMigrationAware
         preevictionfilter:
           disabled: null
-          enabled: null
+          enabled:
+          - KubevirtMigrationAware
         presort:
           disabled: null
           enabled: null

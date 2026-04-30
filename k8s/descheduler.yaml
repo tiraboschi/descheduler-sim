@@ -77,6 +77,14 @@ rules:
       - get
       - patch
       - delete
+  - apiGroups:
+      - kubevirt.io
+    resources:
+      - virtualmachineinstances
+    verbs:
+      - get
+      - list
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -199,7 +207,7 @@ spec:
             - -v=2
           command:
             - /bin/descheduler
-          image: quay.io/tiraboschi/descheduler:nodesim
+          image: quay.io/tiraboschi/descheduler:kubevirtmigrationaware
           imagePullPolicy: IfNotPresent
           name: descheduler
           resources:
