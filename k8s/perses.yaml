@@ -119,11 +119,11 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:cpu:avg1m{instance=~\"$node\"}", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:cpu:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkersutilization:cpu:avg1m{}", "seriesNameFormat": "★ avg workers"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkersutilization:cpu:avg1m{} or vector(0)", "seriesNameFormat": "★ avg workers"}}}
                 }
               ]
             }
@@ -147,11 +147,11 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:memory:avg1m{instance=~\"$node\"}", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:memory:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkersutilization:memory:avg1m{}", "seriesNameFormat": "★ avg workers"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkersutilization:memory:avg1m{} or vector(0)", "seriesNameFormat": "★ avg workers"}}}
                 }
               ]
             }
@@ -175,11 +175,11 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:cpu:avg1m{instance=~\"$node\"}", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:cpu:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkerspressure:cpu:avg1m{}", "seriesNameFormat": "★ avg workers"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkerspressure:cpu:avg1m{} or vector(0)", "seriesNameFormat": "★ avg workers"}}}
                 }
               ]
             }
@@ -203,11 +203,11 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:memory:avg1m{instance=~\"$node\"}", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:memory:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkerspressure:memory:avg1m{}", "seriesNameFormat": "★ avg workers"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:averageworkerspressure:memory:avg1m{} or vector(0)", "seriesNameFormat": "★ avg workers"}}}
                 }
               ]
             }
@@ -234,15 +234,15 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_utilization_value{node=~\"$node\"}", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_utilization_value{node=~\"$node\"} or vector(0)", "seriesNameFormat": "{{node}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "avg(descheduler_lownodeutilization_node_utilization_threshold{threshold_type=\"high\"})", "seriesNameFormat": "High Threshold"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "avg(descheduler_lownodeutilization_node_utilization_threshold{threshold_type=\"high\"}) or vector(0)", "seriesNameFormat": "High Threshold"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "avg(descheduler_lownodeutilization_node_utilization_threshold{threshold_type=\"low\"})", "seriesNameFormat": "Low Threshold"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "avg(descheduler_lownodeutilization_node_utilization_threshold{threshold_type=\"low\"}) or vector(0)", "seriesNameFormat": "Low Threshold"}}}
                 }
               ]
             }
@@ -268,7 +268,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_classification{node=~\"$node\"}", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_classification{node=~\"$node\"} or vector(0)", "seriesNameFormat": "{{node}}"}}}
                 }
               ]
             }
@@ -287,7 +287,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"})", "seriesNameFormat": "Evictions"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} or vector(0)) or vector(0)", "seriesNameFormat": "Evictions"}}}
                 }
               ]
             }
@@ -310,7 +310,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "clamp_min(delta(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[5m]), 0)", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "clamp_min(delta(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[5m]) or vector(0), 0) or vector(0)", "seriesNameFormat": "{{node}}"}}}
                 }
               ]
             }
@@ -345,7 +345,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "bottomk($limit, time() - (max_over_time((time() * (delta(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[5m]) >= bool 1))[6h:1m]) > 0))"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "bottomk($limit, time() - (max_over_time((time() * ((delta(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[5m]) or vector(0)) >= bool 1))[6h:1m]) > 0))"}}}
                 }
               ]
             }
@@ -368,7 +368,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} or vector(0)", "seriesNameFormat": "{{node}}"}}}
                 }
               ]
             }
@@ -387,7 +387,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_kubevirt_eviction_blocks_total{reason=\"cooldown\"})", "seriesNameFormat": "Cooldown blocks"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_kubevirt_eviction_blocks_total{reason=\"cooldown\"}) or vector(0)", "seriesNameFormat": "Cooldown blocks"}}}
                 }
               ]
             }
@@ -406,7 +406,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_kubevirt_eviction_blocks_total{reason=\"migration_in_progress\"})", "seriesNameFormat": "In-flight blocks"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_kubevirt_eviction_blocks_total{reason=\"migration_in_progress\"}) or vector(0)", "seriesNameFormat": "In-flight blocks"}}}
                 }
               ]
             }
@@ -429,11 +429,11 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{reason=\"cooldown\", node=~\"$node\"}[5m])) * 60", "seriesNameFormat": "cooldown (PreEvictionFilter)"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{reason=\"cooldown\", node=~\"$node\"}[5m])) * 60 or vector(0)", "seriesNameFormat": "cooldown (PreEvictionFilter)"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{reason=\"migration_in_progress\", node=~\"$node\"}[5m])) * 60", "seriesNameFormat": "migration in progress (Filter)"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{reason=\"migration_in_progress\", node=~\"$node\"}[5m])) * 60 or vector(0)", "seriesNameFormat": "migration in progress (Filter)"}}}
                 }
               ]
             }
@@ -456,7 +456,57 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{node=~\"$node\"}[5m])) by (node) * 60", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(rate(descheduler_kubevirt_eviction_blocks_total{node=~\"$node\"}[5m])) by (node) * 60 or vector(0)", "seriesNameFormat": "{{node}}"}}}
+                }
+              ]
+            }
+          },
+          "actuationScoreRawVsDampened": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "Actuation Score — Raw vs Dampened per Node",
+                "description": "Solid lines: raw stable distance score (descheduler:node:linear_amplified_ideal_point_positive_distance:k3:p66_5m). Dashed lines: dampened score after the cooldown multiplier is applied (descheduler:node:actuation_priority:p66_5m). The gap between solid and dashed for the same node is the suppression introduced by recent evictions. When the lines overlap the node has not been recently evicted from and is fully eligible."
+              },
+              "plugin": {
+                "kind": "TimeSeriesChart",
+                "spec": {
+                  "legend": {"position": "right", "mode": "table", "values": ["last"]},
+                  "yAxis": {"label": "Score", "format": {"unit": "percent-decimal"}, "min": 0},
+                  "visual": {"display": "line", "lineWidth": 2, "areaOpacity": 0.05}
+                }
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:node:linear_amplified_ideal_point_positive_distance:k3:p66_5m{instance=~\"$node\"}", "seriesNameFormat": "raw — {{instance}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:node:actuation_priority:p66_5m{instance=~\"$node\"}", "seriesNameFormat": "dampened — {{instance}}"}}}
+                }
+              ]
+            }
+          },
+          "cooldownMultiplierByNode": {
+            "kind": "Panel",
+            "spec": {
+              "display": {
+                "name": "Cooldown Multiplier per Node",
+                "description": "The dampening multiplier applied to each node's actuation priority score (descheduler:node:cooldown_multiplier:10m). Starts at 1.0 (no suppression). Each successful eviction from a node in the last 10 minutes reduces it by 0.10. Drops to 0.01 after 10 evictions (fully muted). Watch this alongside the eviction rate to understand how much each node is being suppressed at any moment."
+              },
+              "plugin": {
+                "kind": "TimeSeriesChart",
+                "spec": {
+                  "legend": {"position": "right", "mode": "table", "values": ["last"]},
+                  "yAxis": {"label": "Multiplier", "format": {"unit": "percent-decimal"}, "min": 0},
+                  "visual": {"display": "line", "lineWidth": 2, "areaOpacity": 0.15}
+                }
+              },
+              "queries": [
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:node:cooldown_multiplier:10m{instance=~\"$node\"}", "seriesNameFormat": "{{instance}}"}}}
                 }
               ]
             }
@@ -479,15 +529,15 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "histogram_quantile(0.50, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le))", "seriesNameFormat": "p50"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "(histogram_quantile(0.50, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le)) >= 0) or vector(0)", "seriesNameFormat": "p50"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "histogram_quantile(0.90, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le))", "seriesNameFormat": "p90"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "(histogram_quantile(0.90, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le)) >= 0) or vector(0)", "seriesNameFormat": "p90"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "histogram_quantile(0.99, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le))", "seriesNameFormat": "p99"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "(histogram_quantile(0.99, sum(rate(descheduler_kubevirt_effective_cooldown_seconds_bucket[15m])) by (le)) >= 0) or vector(0)", "seriesNameFormat": "p99"}}}
                 }
               ]
             }
@@ -520,6 +570,16 @@ data:
               "display": {"title": "Synthetic Utilization Value & Dynamic Thresholds", "collapse": {"open": true}},
               "items": [
                 {"x": 0, "y": 0, "width": 24, "height": 10, "content": {"$ref": "#/spec/panels/utilizationValues"}}
+              ]
+            }
+          },
+          {
+            "kind": "Grid",
+            "spec": {
+              "display": {"title": "Actuation Score & Dampening Multiplier", "collapse": {"open": true}},
+              "items": [
+                {"x": 0, "y": 0, "width": 16, "height": 10, "content": {"$ref": "#/spec/panels/actuationScoreRawVsDampened"}},
+                {"x": 16, "y": 0, "width": 8, "height": 10, "content": {"$ref": "#/spec/panels/cooldownMultiplierByNode"}}
               ]
             }
           },
