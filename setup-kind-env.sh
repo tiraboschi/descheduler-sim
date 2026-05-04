@@ -296,8 +296,9 @@ install_prometheus_operator() {
         kubectl apply -f k8s/prometheus.yaml
     fi
 
-    info "Applying Prometheus recording rules..."
-    kubectl apply -f k8s/prometheus-rules.yaml
+    info "Applying Prometheus recording rules (dampening variant)..."
+    sed 's/namespace: openshift-kube-descheduler-operator/namespace: monitoring/' \
+        k8s/prometheus-rules-test-dampeningf.yaml | kubectl apply -f -
 
     info "Patching Prometheus node-exporter to avoid KWOK nodes..."
     # Wait for node-exporter DaemonSet to be created

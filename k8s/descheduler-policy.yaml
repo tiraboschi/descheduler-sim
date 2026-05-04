@@ -105,12 +105,12 @@ data:
             - openshift-vsphere-infra
           metricsUtilization:
             prometheus:
-              query: descheduler:node:linear_amplified_ideal_point_positive_distance:k3:avg1m
+              query: descheduler:node:actuation_priority:p66_5m
             source: Prometheus
           targetThresholds:
-            MetricResource: 10
+            MetricResource: 20
           thresholds:
-            MetricResource: 10
+            MetricResource: 0
           useDeviationThresholds: true
         name: LowNodeUtilization
       - args:
