@@ -235,6 +235,17 @@ install_vm_crd() {
     info "VirtualMachine CRD installed successfully"
 }
 
+install_vmi_crd() {
+    info "Installing VirtualMachineInstance CRD (kubevirt.io/v1)..."
+
+    kubectl apply -f k8s/vmi-crd.yaml
+
+    info "Waiting for VirtualMachineInstance CRD to be established..."
+    kubectl wait --for condition=established --timeout=60s crd/virtualmachineinstances.kubevirt.io
+
+    info "VirtualMachineInstance CRD installed successfully"
+}
+
 install_scenario_crd() {
     info "Installing SimulationScenario CRD..."
 
@@ -285,8 +296,9 @@ install_prometheus_operator() {
         kubectl apply -f k8s/prometheus.yaml
     fi
 
-    info "Applying Prometheus recording rules..."
-    kubectl apply -f k8s/prometheus-rules.yaml
+    info "Applying Prometheus recording rules (dampening variant)..."
+    sed 's/namespace: openshift-kube-descheduler-operator/namespace: monitoring/' \
+        k8s/prometheus-rules-test-dampeningf.yaml | kubectl apply -f -
 
     info "Patching Prometheus node-exporter to avoid KWOK nodes..."
     # Wait for node-exporter DaemonSet to be created
@@ -641,6 +653,10 @@ verify_installation() {
     kubectl get crd virtualmachines.simulation.node-classifier.io
 
     echo ""
+    info "VirtualMachineInstance CRD:"
+    kubectl get crd virtualmachineinstances.kubevirt.io
+
+    echo ""
     info "SimulationScenario CRD:"
     kubectl get crd simulationscenarios.simulation.node-classifier.io
 
@@ -770,6 +786,7 @@ main() {
     create_kind_cluster
     install_kwok
     install_vm_crd
+    install_vmi_crd
     install_scenario_crd
     install_prometheus_operator
     install_descheduler
