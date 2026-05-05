@@ -4,52 +4,170 @@ metadata:
   name: cooldown-demo
   namespace: default
 spec:
-  duration: 20m
-  timeScale: 1.0
-  networkBandwidthMbps: 5000  # 5 Gbps - realistic; slows migrations enough to occasionally catch mid-flight
+  # 60 simulated minutes at 2x speed = ~30 real minutes.
+  # Long enough for:
+  #   - the 10m dampening window to expire and re-engage multiple times
+  #   - the same VM to migrate twice (triggering exponential backoff in cooldown)
+  #   - memory-heavy tasks to exercise the memory dimension of the scoring formula
+  # Note: timeScale only compresses task durations and generator intervals.
+  # Prometheus windows (avg1m, p66_5m, increase[10m]) and the descheduler
+  # cycle (60s) run in real time, so the dampening and cooldown durations are
+  # unchanged in wall-clock terms.
+  duration: 60m
+  timeScale: 2.0
+
+  # 2 Gbps: migrations complete in a few seconds for typical VM sizes,
+  # giving a realistic but non-trivial in-flight window. 5 Gbps was too
+  # fast to catch many in-flight cases; 500 Mbps would make migrations
+  # unrealistically slow relative to the descheduler cycle.
+  networkBandwidthMbps: 2000
 
   nodeSelectors:
-    hottest:
+    hottest-cpu:
       type: dynamic
       strategy: maxMetric
       metric: cpu_usage
 
+    hottest-memory:
+      type: dynamic
+      strategy: maxMetric
+      metric: memory_usage
+
+    # Picks one node at random each firing, regardless of load.
+    # Used to inject unpredictable load that the descheduler must
+    # react to without the scenario always targeting the same node.
+    any-node:
+      type: random
+      count: 1
+
+    # Picks two nodes at random for background load spreading.
+    two-random-nodes:
+      type: random
+      count: 2
+
   taskTypes:
-    sustained-burst:
+    # Very light background hum: keeps the fleet average above zero so
+    # that deviation-based thresholds (useDeviationThresholds: true) have
+    # a meaningful reference. Without this, all nodes start at zero, the
+    # average is zero, and any non-zero node looks infinitely deviant.
+    background-hum:
       resources:
-        # High CPU + memory together drive both dimensions of the
-        # MetricResource distance formula, ensuring the hottest node
-        # lands well above the deviation threshold even at MetricResource: 10.
-        cpu: {min: 0.70, max: 0.90, distribution: uniform}
-        memory: {min: 0.35, max: 0.55, distribution: uniform}
-      # Tasks last 7-9 minutes: longer than the descheduler cycle (60s) so load
-      # accumulates on the hot node, and longer than a single cooldown check
-      # window so migrated VMs remain "hot" when the descheduler finds their
-      # new node.
-      duration: {min: 420, max: 540, mean: 480}
+        cpu:    {min: 0.03, max: 0.10, distribution: uniform}
+        memory: {min: 0.02, max: 0.08, distribution: uniform}
+      # At 2x timeScale these last 1.5-3 real minutes each.
+      duration: {min: 180, max: 360, mean: 270}
+
+    # High-CPU burst: the primary driver of node hotspots.
+    # At 2x timeScale these last 3-4 real minutes — long enough for the
+    # descheduler to run 3-4 cycles and attempt multiple evictions.
+    cpu-burst:
+      resources:
+        cpu:    {min: 0.70, max: 0.90, distribution: uniform}
+        memory: {min: 0.30, max: 0.50, distribution: uniform}
+      duration: {min: 360, max: 480, mean: 420}
+
+    # Memory-heavy task: moderate CPU but high memory.
+    # Exercises the memory dimension of the Euclidean distance formula and
+    # creates hotspots that are invisible to a CPU-only view. Because VMs
+    # have more dirty memory to copy, migrations take longer, increasing
+    # the probability of in-flight migration blocks.
+    # At 2x timeScale these last 4-6 real minutes.
+    memory-heavy:
+      resources:
+        cpu:    {min: 0.15, max: 0.35, distribution: uniform}
+        memory: {min: 0.55, max: 0.75, distribution: uniform}
+      duration: {min: 480, max: 720, mean: 600}
 
   taskGenerators:
-    # Every 90s: fire 4 burst tasks across 3-5 VMs on the hottest node.
+    # ── Generator 1: background hum ────────────────────────────────────────
+    # Runs continuously on two random nodes to establish a non-zero fleet
+    # average. Without baseline load the deviation metric is degenerate
+    # and the dampening multiplier has no meaningful signal to suppress.
+    # At 2x timeScale fires every 30 real seconds.
+    - name: background-hum
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 60s
+      assignment:
+        strategy: nodeAware
+        nodeSelector: two-random-nodes
+        vmSelection:
+          count: {min: 1, max: 2}
+          strategy: random
+      taskType: background-hum
+      rate: {value: 2}
+
+    # ── Generator 2: CPU heat-and-chase ────────────────────────────────────
+    # The core pattern from the original scenario.
     #
-    # The heat-and-chase dynamic:
-    #   1. Hottest node is targeted → 3-5 VMs are candidate targets
-    #   2. 4 burst tasks are spread across those VMs (high CPU + memory)
-    #   3. Node MetricResource score spikes above the deviation threshold
-    #   4. Descheduler (60s cycle) requests evictions → VMs live-migrate
-    #   5. Migrated VMs carry their high utilization to the destination node
-    #   6. That node becomes the new hottest → scenario piles more load onto it
-    #   7. Descheduler tries to evict the same VMs again within 15 minutes
-    #   8. KubevirtMigrationAware PreEvictionFilter: cooldown not expired → BLOCK
-    - name: heat-and-chase
+    # Heat-and-chase dynamic:
+    #   1. Hottest-CPU node targeted → 3-5 VMs loaded
+    #   2. Node spikes above deviation threshold → descheduler evicts
+    #   3. VMs migrate and carry load to destination
+    #   4. Destination becomes new hottest → generator targets it next
+    #   5. PreEvictionFilter cooldown (15 real min) should block re-eviction
+    #
+    # Over a 30-min real run the same VM can migrate twice, triggering the
+    # exponential backoff: count=2 → 2x cooldown = 30 real minutes.
+    # At 2x timeScale fires every 45 real seconds.
+    - name: cpu-hotspot-chase
       enabled: true
       schedule:
         type: periodic
         interval: 90s
       assignment:
         strategy: nodeAware
-        nodeSelector: hottest
+        nodeSelector: hottest-cpu
         vmSelection:
           count: {min: 3, max: 5}
           strategy: random
-      taskType: sustained-burst
+      taskType: cpu-burst
       rate: {value: 4}
+
+    # ── Generator 3: memory hotspot chase ──────────────────────────────────
+    # Independently targets the hottest-by-memory node, which may differ
+    # from the hottest-by-CPU node. This exercises:
+    #   - The memory dimension of the Euclidean scoring formula
+    #   - Scenarios where CPU is moderate but memory makes a node hot
+    #   - Slower migrations (more dirty memory) → higher in-flight block rate
+    #   - The cooldown interacting with a different origin node than the
+    #     CPU chase, potentially creating two simultaneous eviction sources
+    # At 2x timeScale fires every 60 real seconds.
+    - name: memory-hotspot-chase
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 120s
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-memory
+        vmSelection:
+          count: {min: 2, max: 3}
+          strategy: random
+      taskType: memory-heavy
+      rate: {value: 2}
+
+    # ── Generator 4: random spike ───────────────────────────────────────────
+    # Injects a CPU burst on a randomly chosen node every 3 simulated minutes
+    # (90 real seconds at 2x). This:
+    #   - Prevents the scenario from being fully predictable
+    #   - Occasionally targets a node that is already a migration destination,
+    #     forcing the descheduler to attempt eviction of recently migrated VMs
+    #     and exercising the cooldown block on a non-hottest node
+    #   - Creates transient hotspots that the dampening multiplier must handle
+    #     even when the node had no prior evictions
+    # At 2x timeScale fires every 90 real seconds.
+    - name: random-spike
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 180s
+      assignment:
+        strategy: nodeAware
+        nodeSelector: any-node
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: cpu-burst
+      rate: {value: 3}
