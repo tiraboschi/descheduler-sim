@@ -103,6 +103,8 @@ data:
             - openshift-user-workload-monitoring
             - openshift-virtualization-os-images
             - openshift-vsphere-infra
+          evictionLimits:
+            node: 2          # allow up to 5 evictions from this node per cycle
           metricsUtilization:
             prometheus:
               query: descheduler:node:actuation_priority:p66_5m
@@ -140,4 +142,4 @@ data:
         sort:
           disabled: null
           enabled: null
-
+          
