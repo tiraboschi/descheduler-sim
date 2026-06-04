@@ -66,7 +66,7 @@ data:
       },
       "spec": {
         "duration": "1h",
-        "refreshInterval": "1m",
+        "refreshInterval": "0s",
         "variables": [
           {
             "kind": "ListVariable",
@@ -75,12 +75,27 @@ data:
               "display": {"name": "Node", "hidden": false},
               "allowMultiple": true,
               "allowAllValue": true,
+              "defaultValue": "$__all",
               "plugin": {
                 "kind": "PrometheusLabelValuesVariable",
                 "spec": {
                   "labelName": "instance",
                   "matchers": ["descheduler:nodeutilization:cpu:avg1m"]
                 }
+              }
+            }
+          },
+          {
+            "kind": "ListVariable",
+            "spec": {
+              "name": "resolution",
+              "display": {"name": "Classification Resolution", "hidden": false},
+              "allowMultiple": false,
+              "allowAllValue": false,
+              "defaultValue": "5m",
+              "plugin": {
+                "kind": "StaticListVariable",
+                "spec": {"values": ["1m", "2m", "5m", "10m"]}
               }
             }
           },
@@ -113,13 +128,20 @@ data:
                   "legend": {"position": "right", "mode": "list"},
                   "yAxis": {"label": "CPU Utilization", "format": {"unit": "percent-decimal"}, "min": 0},
                   "visual": {"display": "line", "lineWidth": 1, "areaOpacity": 0.05},
-                  "querySettings": [{"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#e02020"}]
+                  "querySettings": [
+                    {"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#888888"},
+                    {"queryIndex": 2, "colorMode": "fixed-single", "colorValue": "#e02020"}
+                  ]
                 }
               },
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:cpu:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:cpu:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"worker\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "{{instance}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:cpu:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"master\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "(M) {{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
@@ -141,13 +163,20 @@ data:
                   "legend": {"position": "right", "mode": "list"},
                   "yAxis": {"label": "Memory Utilization", "format": {"unit": "percent-decimal"}, "min": 0},
                   "visual": {"display": "line", "lineWidth": 1, "areaOpacity": 0.05},
-                  "querySettings": [{"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#e02020"}]
+                  "querySettings": [
+                    {"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#888888"},
+                    {"queryIndex": 2, "colorMode": "fixed-single", "colorValue": "#e02020"}
+                  ]
                 }
               },
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:memory:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:memory:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"worker\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "{{instance}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodeutilization:memory:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"master\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "(M) {{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
@@ -169,13 +198,20 @@ data:
                   "legend": {"position": "right", "mode": "list"},
                   "yAxis": {"label": "CPU Pressure", "format": {"unit": "percent-decimal"}, "min": 0},
                   "visual": {"display": "line", "lineWidth": 1, "areaOpacity": 0.05},
-                  "querySettings": [{"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#e02020"}]
+                  "querySettings": [
+                    {"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#888888"},
+                    {"queryIndex": 2, "colorMode": "fixed-single", "colorValue": "#e02020"}
+                  ]
                 }
               },
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:cpu:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:cpu:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"worker\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "{{instance}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:cpu:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"master\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "(M) {{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
@@ -197,13 +233,20 @@ data:
                   "legend": {"position": "right", "mode": "list"},
                   "yAxis": {"label": "Memory Pressure", "format": {"unit": "percent-decimal"}, "min": 0},
                   "visual": {"display": "line", "lineWidth": 1, "areaOpacity": 0.05},
-                  "querySettings": [{"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#e02020"}]
+                  "querySettings": [
+                    {"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#888888"},
+                    {"queryIndex": 2, "colorMode": "fixed-single", "colorValue": "#e02020"}
+                  ]
                 }
               },
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:memory:avg1m{instance=~\"$node\"} or vector(0)", "seriesNameFormat": "{{instance}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:memory:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"worker\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "{{instance}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler:nodepressure:memory:avg1m{instance=~\"$node\"} and on(instance) label_replace(kube_node_role{role=\"master\"}, \"instance\", \"$1\", \"node\", \"(.*)\")", "seriesNameFormat": "(M) {{instance}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
@@ -226,15 +269,20 @@ data:
                   "yAxis": {"label": "Utilization Value", "format": {"unit": "percent-decimal"}, "min": 0},
                   "visual": {"display": "line", "lineWidth": 1, "areaOpacity": 0.05},
                   "querySettings": [
-                    {"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#f2495c"},
-                    {"queryIndex": 2, "colorMode": "fixed-single", "colorValue": "#ff9830"}
+                    {"queryIndex": 1, "colorMode": "fixed-single", "colorValue": "#888888"},
+                    {"queryIndex": 2, "colorMode": "fixed-single", "colorValue": "#f2495c"},
+                    {"queryIndex": 3, "colorMode": "fixed-single", "colorValue": "#ff9830"}
                   ]
                 }
               },
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_utilization_value{node=~\"$node\"} or vector(0)", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_utilization_value{node=~\"$node\"} and on(node) kube_node_role{role=\"worker\"}", "seriesNameFormat": "{{node}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_utilization_value{node=~\"$node\"} and on(node) kube_node_role{role=\"master\"}", "seriesNameFormat": "(M) {{node}}"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
@@ -252,7 +300,7 @@ data:
             "spec": {
               "display": {
                 "name": "Node Classification over Time",
-                "description": "Each row is a node. The color shows how the descheduler classified it at each point in time: Underutilized (blue, will receive workloads), Normal (green, balanced), Overutilized (red, workloads will be evicted/migrated away)."
+                "description": "Each row is a node. The color shows the worst-case classification within each resolution bucket: Overutilized (red, workloads will be evicted/migrated away) > Normal (green, balanced) > Underutilized (blue, will receive workloads). Resolution is controlled by the Classification Resolution variable."
               },
               "plugin": {
                 "kind": "StatusHistoryChart",
@@ -268,7 +316,11 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_lownodeutilization_node_classification{node=~\"$node\"} or vector(0)", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "max_over_time((descheduler_lownodeutilization_node_classification{node=~\"$node\"} and on(node) kube_node_role{role=\"worker\"})[$resolution:$resolution])", "seriesNameFormat": "{{node}}"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "max_over_time((descheduler_lownodeutilization_node_classification{node=~\"$node\"} and on(node) kube_node_role{role=\"master\"})[$resolution:$resolution])", "seriesNameFormat": "(M) {{node}}"}}}
                 }
               ]
             }
@@ -277,8 +329,8 @@ data:
             "kind": "Panel",
             "spec": {
               "display": {
-                "name": "Total Evictions",
-                "description": "Cumulative pods evicted by the KubeVirtRelieveAndMigrate profile across selected nodes."
+                "name": "Evictions Summary",
+                "description": "Counts over the selected timeframe. Completed: evictions that finished (regular pods evicted directly + VM migrations that settled). VM Migrations Started: live migrations initiated for virt-launcher pods (background evictions). Failed: eviction errors."
               },
               "plugin": {
                 "kind": "StatChart",
@@ -287,7 +339,15 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "sum(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} or vector(0)) or vector(0)", "seriesNameFormat": "Evictions"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(increase((sum(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} or vector(0)))[$__range:1m]))", "seriesNameFormat": "Completed"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(increase((sum(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"background\", node=~\"$node\"} or vector(0)))[$__range:1m]))", "seriesNameFormat": "VM Migrations Started"}}}
+                },
+                {
+                  "kind": "TimeSeriesQuery",
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(increase((sum(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"error\", node=~\"$node\"} or vector(0)))[$__range:1m]))", "seriesNameFormat": "Failed"}}}
                 }
               ]
             }
@@ -310,7 +370,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "clamp_min(delta(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[5m]) or vector(0), 0) or vector(0)", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "clamp_min(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} - (descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} offset 5m or descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} * 0), 0)", "seriesNameFormat": "{{node}}"}}}
                 }
               ]
             }
@@ -345,7 +405,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "bottomk($limit, time() - (max_over_time((time() * ((delta(descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[5m]) or vector(0)) >= bool 1))[6h:1m]) > 0))"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "bottomk($limit, time() - (max_over_time((time() * (((descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} > descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} offset 5m) or (descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} unless descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} offset 5m)) > bool 0))[6h:1m]) > 0))"}}}
                 }
               ]
             }
@@ -354,8 +414,8 @@ data:
             "kind": "Panel",
             "spec": {
               "display": {
-                "name": "Pods Evicted (KubeVirtRelieveAndMigrate) — per Node",
-                "description": "Cumulative successful evictions over time broken down by source node."
+                "name": "Completed Evictions (KubeVirtRelieveAndMigrate) — per Node",
+                "description": "Cumulative completed evictions (result=success) over time broken down by source node."
               },
               "plugin": {
                 "kind": "TimeSeriesChart",
@@ -368,7 +428,7 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_pods_evicted{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} or vector(0)", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}", "seriesNameFormat": "{{node}}"}}}
                 }
               ]
             }
@@ -586,7 +646,7 @@ data:
           {
             "kind": "Grid",
             "spec": {
-              "display": {"title": "Node Classification over Time", "collapse": {"open": true}},
+              "display": {"title": "Node Classification over Time", "collapse": {"open": false}},
               "items": [
                 {"x": 0, "y": 0, "width": 24, "height": 10, "content": {"$ref": "#/spec/panels/nodeClassification"}}
               ]
@@ -597,7 +657,7 @@ data:
             "spec": {
               "display": {"title": "Evictions", "collapse": {"open": true}},
               "items": [
-                {"x": 0, "y": 0, "width": 4, "height": 4, "content": {"$ref": "#/spec/panels/totalEvictions"}},
+                {"x": 0, "y": 0, "width": 4, "height": 8, "content": {"$ref": "#/spec/panels/totalEvictions"}},
                 {"x": 4, "y": 0, "width": 20, "height": 8, "content": {"$ref": "#/spec/panels/evictionsTimeSeries"}},
                 {"x": 0, "y": 8, "width": 24, "height": 8, "content": {"$ref": "#/spec/panels/evictionsRate"}},
                 {"x": 0, "y": 16, "width": 24, "height": 10, "content": {"$ref": "#/spec/panels/evictionHistory"}}
