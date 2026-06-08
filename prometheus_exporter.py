@@ -116,6 +116,23 @@ node_role_gauge = Gauge(
 )
 
 
+def _parse_k8s_cpu(cpu_str: str) -> float:
+    """Parse a Kubernetes CPU string ('128', '500m') to float cores."""
+    if cpu_str.endswith('m'):
+        return float(cpu_str[:-1]) / 1000.0
+    return float(cpu_str)
+
+
+def _parse_k8s_memory(mem_str: str) -> int:
+    """Parse a Kubernetes memory string ('2355Gi', '512Mi') to bytes."""
+    for suffix, mult in [('Ti', 1024**4), ('Gi', 1024**3), ('Mi', 1024**2),
+                          ('Ki', 1024), ('T', 1000**4), ('G', 1000**3),
+                          ('M', 1000**2), ('K', 1000)]:
+        if mem_str.endswith(suffix):
+            return int(float(mem_str[:-len(suffix)]) * mult)
+    return int(mem_str)
+
+
 @dataclass
 class ExporterState:
     """Thread-safe state for the exporter - READ-ONLY metrics collection."""
@@ -124,8 +141,10 @@ class ExporterState:
     k8s_client: Optional[client.CoreV1Api] = None
     # Track last update time for each node to calculate counter increments
     last_update_time: Dict[str, float] = field(default_factory=dict)
-    # Node configuration
-    node_cpu_cores: float = 32.0  # 32 CPU cores per KWOK node
+    # Per-node capacity cache, populated from status.allocatable on discovery
+    node_capacities: Dict[str, Dict] = field(default_factory=dict)
+    # Fallback node configuration (used before capacity is discovered)
+    node_cpu_cores: float = 32.0
 
     def __post_init__(self):
         """Initialize Kubernetes client for READ-ONLY metrics collection."""
@@ -181,10 +200,12 @@ class ExporterState:
                     cpu_util = float(annotations.get("simulation.node-classifier.io/vm-cpu-utilization", "0"))
                     mem_util = float(annotations.get("simulation.node-classifier.io/vm-memory-utilization", "0"))
 
-                    # Calculate actual consumption: cores * utilization / node_capacity
-                    # Assuming 32 cores and 512Gi per node
-                    node_cpu_cores = 32.0
-                    node_memory_bytes = 512 * 1024 ** 3
+                    # Calculate actual consumption: cores * utilization / node_capacity.
+                    # Use real allocatable values discovered from the node; fall back to
+                    # the legacy defaults (32c / 512 GiB) only when not yet cached.
+                    cap = self.node_capacities.get(node_name, {})
+                    node_cpu_cores = cap.get('cpu_cores', 32.0)
+                    node_memory_bytes = cap.get('memory_bytes', 512 * 1024 ** 3)
 
                     actual_cpu_consumption = (cpu_cores * cpu_util) / node_cpu_cores
                     actual_memory_consumption = (memory_bytes * mem_util) / node_memory_bytes
@@ -279,7 +300,8 @@ class ExporterState:
 
                 # Node-exporter style memory metrics (always set, not incremented)
                 # Calculate available memory from usage ratio
-                node_memory_bytes = 512 * 1024 ** 3  # 512 GiB
+                cap = self.node_capacities.get(node_name, {})
+                node_memory_bytes = cap.get('memory_bytes', 512 * 1024 ** 3)
                 memory_available_bytes = node_memory_bytes * (1.0 - metrics["memory_usage"])
                 memory_available_gauge.labels(instance=node_name).set(memory_available_bytes)
 
@@ -376,6 +398,20 @@ def metrics():
             logger.info(f"Found {len(nodes.items)} KWOK nodes to update metrics")
             for node in nodes.items:
                 node_name = node.metadata.name
+                # Cache real allocatable capacity so utilisation maths are correct
+                # regardless of node size (handles both default kwok-node-* and pilot nodes).
+                try:
+                    alloc = node.status.allocatable or {}
+                    cpu_cores = _parse_k8s_cpu(alloc.get('cpu', '32'))
+                    mem_bytes = _parse_k8s_memory(alloc.get('memory', str(512 * 1024 ** 3)))
+                    with state.lock:
+                        state.node_capacities[node_name] = {
+                            'cpu_cores': cpu_cores,
+                            'memory_bytes': mem_bytes,
+                        }
+                    logger.debug(f"Cached capacity for {node_name}: {cpu_cores} cores, {mem_bytes} bytes")
+                except Exception as cap_err:
+                    logger.warning(f"Could not parse capacity for {node_name}: {cap_err}")
                 logger.info(f"Updating metrics for {node_name}")
                 state.update_node_metrics(node_name)
                 updated_nodes.add(node_name)

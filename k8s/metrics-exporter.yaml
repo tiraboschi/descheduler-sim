@@ -136,11 +136,12 @@ spec:
       interval: 15s
       path: /metrics
       metricRelabelings:
-        # Remap exported_instance back to instance for node-exporter compatible metrics
+        # Remap exported_instance back to instance for node-exporter compatible metrics.
         # Prometheus renames 'instance' to 'exported_instance' because 'instance' is reserved
         # for the scrape target address. We need to restore it for OpenShift recording rules.
+        # Match any non-empty value so nodes with any naming convention are covered.
         - sourceLabels: [exported_instance]
           targetLabel: instance
-          regex: '(kwok-node-.+)'
+          regex: '(.+)'
           replacement: '$1'
           action: replace
