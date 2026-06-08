@@ -1,0 +1,2825 @@
+# Pilot VM Fleet — 148 VMs
+# Apply with: kubectl apply -f k8s/pilot-vms.yaml
+
+# --- 56 x 8c / 80Gi (8c80g) ---
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-001
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-002
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-003
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-004
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-005
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-006
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-007
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-008
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-009
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-010
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 4000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-011
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-012
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-013
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-014
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-015
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-016
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-017
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-018
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-019
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-020
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 4000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-021
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-022
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-023
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-024
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-025
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-026
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-027
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-028
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-029
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-030
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 4000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-031
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-032
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-033
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-034
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-035
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-036
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-037
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-038
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-039
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-040
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 4000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-041
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-042
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-043
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-044
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-045
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-046
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-047
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-048
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-049
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 500
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-050
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 4000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-051
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-052
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-053
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-054
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-055
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c80g-056
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c80g
+spec:
+  resources:
+    cpu: "8"
+    memory: "80Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+
+# --- 61 x 8c / 64Gi (8c64g) ---
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-001
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-002
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-003
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-004
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-005
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-006
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-007
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-008
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-009
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-010
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-011
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-012
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-013
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-014
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-015
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-016
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-017
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-018
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-019
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-020
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-021
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-022
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-023
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-024
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-025
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-026
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-027
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-028
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-029
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-030
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-031
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-032
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-033
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-034
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-035
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-036
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-037
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-038
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-039
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-040
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-041
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-042
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-043
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-044
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-045
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-046
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-047
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-048
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-049
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-050
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-051
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-052
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-053
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-054
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-055
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-056
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-057
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-058
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-059
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 2000
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-060
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c64g-061
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c64g
+spec:
+  resources:
+    cpu: "8"
+    memory: "64Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 800
+  running: true
+
+# --- 3 x 8c / 32Gi (8c32g) ---
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c32g-001
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c32g
+spec:
+  resources:
+    cpu: "8"
+    memory: "32Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 400
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c32g-002
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c32g
+spec:
+  resources:
+    cpu: "8"
+    memory: "32Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 400
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-8c32g-003
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 8c32g
+spec:
+  resources:
+    cpu: "8"
+    memory: "32Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 400
+  running: true
+
+# --- 24 x 4c / 16Gi (4c16g) ---
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-001
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-002
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-003
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-004
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-005
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-006
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-007
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-008
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-009
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-010
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-011
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-012
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-013
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-014
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-015
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-016
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-017
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-018
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-019
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-020
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-021
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-022
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-023
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c16g-024
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c16g
+spec:
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 200
+  running: true
+
+# --- 4 x 4c / 8Gi (4c8g) ---
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c8g-001
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c8g
+spec:
+  resources:
+    cpu: "4"
+    memory: "8Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 50
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c8g-002
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c8g
+spec:
+  resources:
+    cpu: "4"
+    memory: "8Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 50
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c8g-003
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c8g
+spec:
+  resources:
+    cpu: "4"
+    memory: "8Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 50
+  running: true
+---
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: pilot-4c8g-004
+  namespace: default
+  labels:
+    scenario: pilot
+    vm-class: 4c8g
+spec:
+  resources:
+    cpu: "4"
+    memory: "8Gi"
+  utilization:
+    cpu: "0.1"
+    memory: "0.54"
+  migration:
+    dirtyRateMbps: 50
+  running: true
+

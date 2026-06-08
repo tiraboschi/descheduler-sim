@@ -16,6 +16,9 @@ NC='\033[0m' # No Color
 KIND_CLUSTER_NAME="node-classifier-sim"
 PROMETHEUS_OPERATOR_VERSION="v0.71.0"
 CONTAINER_RUNTIME=""
+PILOT_MODE=false
+NODES_FILE="k8s/kwok-nodes.yaml"
+VMS_FILE="k8s/example-vms.yaml"
 
 # Helper functions
 info() {
@@ -199,7 +202,7 @@ install_kwok() {
     kubectl wait --for=condition=Available deployment/kwok-controller -n kube-system --timeout=120s
 
     info "Creating KWOK fake nodes..."
-    kubectl apply -f k8s/kwok-nodes.yaml
+    kubectl apply -f "$NODES_FILE"
 
     info "Waiting for KWOK nodes to be ready..."
     sleep 5
@@ -763,9 +766,9 @@ deploy_perses() {
 }
 
 create_example_vms() {
-    info "Creating example VirtualMachines..."
+    info "Creating VirtualMachines from $VMS_FILE ..."
 
-    kubectl apply -f k8s/example-vms.yaml
+    kubectl apply -f "$VMS_FILE"
 
     info "Waiting for VMs to be created..."
     sleep 3
@@ -773,15 +776,38 @@ create_example_vms() {
     VM_COUNT=$(kubectl get vm --no-headers 2>/dev/null | wc -l)
     info "Created $VM_COUNT VirtualMachines"
 
-    info "Waiting for virt-launcher pods to be created..."
-    sleep 5
+    if [ "$PILOT_MODE" = true ]; then
+        info "Pilot mode: $VM_COUNT VMs scheduled — run the scenario separately once pods are Ready:"
+        info "  kubectl wait --for=condition=Ready pod -l app=virt-launcher --timeout=300s"
+        info "  kubectl apply -f k8s/pilot-scenario.yaml"
+    else
+        info "Waiting for virt-launcher pods to be created..."
+        sleep 5
+        POD_COUNT=$(kubectl get pods -l app=virt-launcher --no-headers 2>/dev/null | wc -l)
+        info "Created $POD_COUNT virt-launcher pods"
+    fi
+}
 
-    POD_COUNT=$(kubectl get pods -l app=virt-launcher --no-headers 2>/dev/null | wc -l)
-    info "Created $POD_COUNT virt-launcher pods"
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --pilot)
+                PILOT_MODE=true
+                NODES_FILE="k8s/pilot-nodes.yaml"
+                VMS_FILE="k8s/pilot-vms.yaml"
+                info "Pilot mode enabled — using $NODES_FILE and $VMS_FILE"
+                ;;
+            *)
+                warn "Unknown argument: $1"
+                ;;
+        esac
+        shift
+    done
 }
 
 # Main execution
 main() {
+    parse_args "$@"
     check_prereqs
     create_kind_cluster
     install_kwok

@@ -1,0 +1,212 @@
+# Pilot Simulation Scenario
+#
+# Models a typical business-hours workload day based on real customer data:
+#
+# Cluster:      10 nodes, 128c / 2.3 TiB each, 10 Gbps shared network
+# VM fleet:     148 VMs (8c/80Gi × 56, 8c/64Gi × 61, 8c/32Gi × 3, 4c/16Gi × 24, 4c/8Gi × 4)
+# VM base util: CPU 10% (off-peak idle), Memory 54% (stable, fixed allocations)
+#
+# Descheduler:  KubeVirtRelieveAndMigrate, AsymmetricHigh thresholds, 5-min interval
+# Migration:    max 5 cluster-wide, max 2 outbound per node
+#
+# Workload pattern modelled (compressed into 60 real minutes):
+#   - Continuous background hum representing off-peak steady state (CPU ~20% cluster-wide)
+#   - Business-hours load increase targeting hot nodes (CPU ~30% cluster-wide average)
+#   - Intra-day spikes: ~4 events representing the "1-3 per day, 10-20% above baseline"
+#     customer-reported pattern (CPU bursting to ~47% worst-case)
+#   - Memory-intensive batch tasks targeting the hottest-memory node, exercising the
+#     memory dimension of the scoring formula and producing longer migrations
+#
+# Expected descheduler behaviour:
+#   - Node utilization climbs above the AsymmetricHigh deviation threshold when spikes land
+#   - Descheduler evicts / migrates VMs from overutilized nodes (max 2 per node per cycle)
+#   - KubevirtMigrationAware PreEvictionFilter blocks re-eviction of recently migrated VMs
+#   - Cooldown multiplier suppresses repeated evictions from the same node
+#   - After 3-4 descheduler cycles (15-20 real minutes) utilization should re-balance
+
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: SimulationScenario
+metadata:
+  name: pilot-biz-hours
+  namespace: default
+spec:
+  # 60 real minutes at 1× — keeps all Prometheus windows, recording rules, and descheduler
+  # cycles in real-wall-clock time so results are directly comparable to a live cluster.
+  duration: 60m
+  timeScale: 1.0
+
+  # 10 Gbps shared network (shared with workload traffic per customer).
+  # Dirty rates range 50-4000 Mbps: migrations of memory-intensive VMs may take
+  # 10-20 s; lighter VMs complete in under 1 s.
+  networkBandwidthMbps: 10000
+
+  nodeSelectors:
+    # The single most CPU-loaded node — primary target for business-hours heat.
+    hottest-cpu:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+
+    # Top 2 CPU-loaded nodes — secondary spread to create multi-node imbalance.
+    top2-cpu:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+      count: 2
+
+    # Most memory-loaded node — for overnight batch and memory-pipeline tasks.
+    hottest-memory:
+      type: dynamic
+      strategy: maxMetric
+      metric: memory_usage
+
+    # A single randomly chosen node — used by the spike injector so that the
+    # descheduler cannot predict which node will become hot next.
+    any-node:
+      type: random
+      count: 1
+
+    # Three randomly chosen nodes for background baseline spread.
+    three-random-nodes:
+      type: random
+      count: 3
+
+  taskTypes:
+    # ── Off-peak background hum ───────────────────────────────────────────────
+    # Adds a small increment on top of the 10% CPU base utilization to represent
+    # the cluster-wide 20% off-peak load (base 10% + hum 3-8% ≈ 13-18% total).
+    # These tasks are long-lived so the metric does not drop to zero between
+    # generator firings — important for deviation-based thresholds to work.
+    background-hum:
+      resources:
+        cpu:    {min: 0.03, max: 0.08, distribution: uniform}
+        memory: {min: 0.01, max: 0.03, distribution: uniform}
+      duration: {min: 300, max: 900}
+
+    # ── Business-hours load ───────────────────────────────────────────────────
+    # Represents the Mon-Fri 10am-6pm peak.  Added on top of the 10% base the
+    # CPU reaches ~25-35% of allocated, matching the customer's 30% average.
+    # Memory bump is small (customer noted memory is "relatively stable").
+    business-hours:
+      resources:
+        cpu:    {min: 0.15, max: 0.28, distribution: normal, mean: 0.20, stddev: 0.04}
+        memory: {min: 0.02, max: 0.08, distribution: uniform}
+      duration: {min: 1800, max: 5400, mean: 3600, distribution: exponential}
+
+    # ── Intra-day spike ───────────────────────────────────────────────────────
+    # "1-3 spikes per day during business hours, 10-20% above baseline, lasting
+    # 1-3 hours."  On top of the business-hours load this pushes CPU to 40-50%
+    # of allocated, matching the reported 47% worst-case.
+    business-spike:
+      resources:
+        cpu:    {min: 0.20, max: 0.40, distribution: uniform}
+        memory: {min: 0.05, max: 0.14, distribution: uniform}
+      duration: {min: 3600, max: 10800}
+
+    # ── Memory-intensive pipeline / batch ─────────────────────────────────────
+    # Represents "overnight batch jobs" and the memory-intensive steps in the
+    # processing chain.  Low CPU increment (batch doesn't need lots of compute)
+    # but significant memory bump (68% max observed during batch windows).
+    # Higher dirty rate VMs in this class make migrations take 5-20 s.
+    memory-batch:
+      resources:
+        cpu:    {min: 0.02, max: 0.07, distribution: uniform}
+        memory: {min: 0.08, max: 0.18, distribution: uniform}
+      duration: {min: 1200, max: 5400, mean: 2700, distribution: exponential}
+
+  taskGenerators:
+    # ── Generator 1: off-peak background hum ──────────────────────────────────
+    # Fires every 3 minutes, picks 3 random nodes, assigns 1-3 VMs per node.
+    # Keeps the fleet average above zero so deviation-based thresholds have
+    # a stable reference. Without this, nodes start at the base utilization
+    # (10%) and the average is trivially zero if no tasks are running.
+    - name: background-hum
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 3m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: three-random-nodes
+        vmSelection:
+          count: {min: 1, max: 3}
+          strategy: random
+      taskType: background-hum
+      rate: {lambda: 2, distribution: poisson}
+
+    # ── Generator 2: business-hours load on hottest node ──────────────────────
+    # Primary heat-and-chase pattern:
+    #   1. Hottest-CPU node is loaded with 3-6 more VMs worth of tasks.
+    #   2. Node crosses the deviation threshold → descheduler targets it.
+    #   3. VMs migrate; destination becomes new hottest → generator targets it.
+    #   4. KubevirtMigrationAware cooldown blocks re-eviction of recently moved VMs.
+    # Fires every 5 minutes (= 1 descheduler cycle interval from customer config).
+    - name: business-hours-hotspot
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-cpu
+        vmSelection:
+          count: {min: 3, max: 6}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 4}
+
+    # ── Generator 3: secondary spread on top-2 CPU nodes ─────────────────────
+    # Adds load to both the hottest and second-hottest node.  Creates a broader
+    # imbalance (2 hot nodes vs. 8 cooler ones), giving the descheduler more
+    # migration targets and exercising the per-node eviction limit (2 outbound).
+    - name: business-hours-spread
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 7m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: top2-cpu
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 2}
+
+    # ── Generator 4: intra-day spike ──────────────────────────────────────────
+    # "1-3 spikes per day" compressed into a 60-minute window → fires every
+    # 15 minutes (≈ 4 events).  Targets a random node to be unpredictable;
+    # occasionally this lands on a node that was recently a migration destination,
+    # forcing the descheduler to attempt re-eviction and exercising the cooldown.
+    - name: spike-injector
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 15m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: any-node
+        vmSelection:
+          count: {min: 2, max: 5}
+          strategy: random
+      taskType: business-spike
+      rate: {value: 3}
+
+    # ── Generator 5: memory-intensive batch / pipeline tasks ──────────────────
+    # Targets the hottest-memory node, exercising the memory dimension of the
+    # Euclidean distance scoring formula.  These tasks have high dirty rates on
+    # large VMs, so migrations triggered by memory imbalance take longer and
+    # increase the probability of in-flight migration blocks.
+    - name: memory-pipeline-load
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 10m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-memory
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: memory-batch
+      rate: {value: 2}
