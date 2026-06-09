@@ -330,7 +330,7 @@ data:
             "spec": {
               "display": {
                 "name": "Evictions Summary",
-                "description": "Counts over the selected timeframe. Completed: evictions that finished (regular pods evicted directly + VM migrations that settled). VM Migrations Started: live migrations initiated for virt-launcher pods (background evictions). Failed: eviction errors."
+                "description": "Counts over the selected timeframe. Completed: evictions that finished (regular pods evicted directly + VM migrations that settled). VM Migrations Started: live migrations initiated for virt-launcher pods (background evictions). Failed: eviction errors (non-zero signals a descheduler or API issue). Uses increase() to handle descheduler pod restarts that reset the counters."
               },
               "plugin": {
                 "kind": "StatChart",
@@ -414,21 +414,21 @@ data:
             "kind": "Panel",
             "spec": {
               "display": {
-                "name": "Completed Evictions (KubeVirtRelieveAndMigrate) — per Node",
-                "description": "Cumulative completed evictions (result=success) over time broken down by source node."
+                "name": "Evictions (KubeVirtRelieveAndMigrate) — per Node, rolling 30 min",
+                "description": "Successful evictions in the trailing 30-minute window per node. Uses clamp_min(counter - offset 30m, 0) so a descheduler pod restart (which resets the counter to 0) shows as a brief gap rather than a counter cliff back to zero."
               },
               "plugin": {
                 "kind": "TimeSeriesChart",
                 "spec": {
                   "legend": {"position": "right", "mode": "table", "values": ["last"]},
-                  "yAxis": {"label": "Evicted Pods", "format": {"unit": "decimal", "decimalPlaces": 0}, "min": 0},
+                  "yAxis": {"label": "Evictions (last 30 min)", "format": {"unit": "decimal", "decimalPlaces": 0}, "min": 0},
                   "visual": {"display": "line", "lineWidth": 2, "areaOpacity": 0.1}
                 }
               },
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}", "seriesNameFormat": "{{node}}"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "clamp_min(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} - (descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} offset 30m or descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} * 0), 0)", "seriesNameFormat": "{{node}}"}}}
                 }
               ]
             }
@@ -657,8 +657,8 @@ data:
             "spec": {
               "display": {"title": "Evictions", "collapse": {"open": true}},
               "items": [
-                {"x": 0, "y": 0, "width": 4, "height": 8, "content": {"$ref": "#/spec/panels/totalEvictions"}},
-                {"x": 4, "y": 0, "width": 20, "height": 8, "content": {"$ref": "#/spec/panels/evictionsTimeSeries"}},
+                {"x": 0, "y": 0, "width": 6, "height": 8, "content": {"$ref": "#/spec/panels/totalEvictions"}},
+                {"x": 6, "y": 0, "width": 18, "height": 8, "content": {"$ref": "#/spec/panels/evictionsTimeSeries"}},
                 {"x": 0, "y": 8, "width": 24, "height": 8, "content": {"$ref": "#/spec/panels/evictionsRate"}},
                 {"x": 0, "y": 16, "width": 24, "height": 10, "content": {"$ref": "#/spec/panels/evictionHistory"}}
               ]
