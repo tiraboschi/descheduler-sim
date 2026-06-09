@@ -250,6 +250,9 @@ class ScenarioExecutor:
         # Active tasks (VM -> list of active tasks)
         self.active_tasks: Dict[str, List[ActiveTask]] = defaultdict(list)
 
+        # Baseline utilization per VM snapshotted on first task assignment
+        self.vm_baselines: Dict[str, Dict[str, float]] = {}
+
         # Statistics
         self.total_tasks_generated = 0
 
@@ -501,8 +504,8 @@ class ScenarioExecutor:
         tasks = self.active_tasks.get(vm_id, [])
 
         # Sum up all active tasks
-        total_cpu = sum(task.cpu for task in tasks)
-        total_memory = sum(task.memory for task in tasks)
+        task_cpu = sum(task.cpu for task in tasks)
+        task_memory = sum(task.memory for task in tasks)
 
         # Update VM CR
         try:
@@ -513,6 +516,18 @@ class ScenarioExecutor:
                 plural="virtualmachines",
                 name=vm_id
             )
+
+            # Snapshot idle baseline on first touch so task load adds on top of it
+            if vm_id not in self.vm_baselines:
+                util = vm.get('spec', {}).get('utilization', {})
+                self.vm_baselines[vm_id] = {
+                    'cpu': float(util.get('cpu', 0.0)),
+                    'memory': float(util.get('memory', 0.0)),
+                }
+
+            baseline = self.vm_baselines[vm_id]
+            total_cpu = baseline['cpu'] + task_cpu
+            total_memory = baseline['memory'] + task_memory
 
             # Update utilization in spec
             if 'spec' not in vm:
@@ -532,7 +547,7 @@ class ScenarioExecutor:
                 body=vm
             )
 
-            logger.debug(f"Updated {vm_id} utilization: CPU={total_cpu:.2f}, MEM={total_memory:.2f}")
+            logger.debug(f"Updated {vm_id} utilization: CPU={total_cpu:.2f} (base={baseline['cpu']:.2f}+tasks={task_cpu:.2f}), MEM={total_memory:.2f} (base={baseline['memory']:.2f}+tasks={task_memory:.2f})")
 
         except ApiException as e:
             logger.error(f"Failed to update VM {vm_id}: {e}")
