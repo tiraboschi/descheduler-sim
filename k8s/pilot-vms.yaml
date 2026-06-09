@@ -17,7 +17,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -36,7 +36,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -55,7 +55,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -74,7 +74,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -93,7 +93,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -112,7 +112,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -131,7 +131,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -150,7 +150,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -169,7 +169,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -188,7 +188,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 4000
   running: true
@@ -207,7 +207,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -226,7 +226,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -245,7 +245,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -264,7 +264,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -283,7 +283,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -302,7 +302,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -321,7 +321,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -340,7 +340,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -359,7 +359,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -378,7 +378,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 4000
   running: true
@@ -397,7 +397,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -416,7 +416,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -435,7 +435,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -454,7 +454,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -473,7 +473,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -492,7 +492,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -511,7 +511,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -530,7 +530,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -549,7 +549,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -568,7 +568,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 4000
   running: true
@@ -587,7 +587,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -606,7 +606,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -625,7 +625,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -644,7 +644,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -663,7 +663,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -682,7 +682,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -701,7 +701,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -720,7 +720,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -739,7 +739,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -758,7 +758,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 4000
   running: true
@@ -777,7 +777,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -796,7 +796,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -815,7 +815,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -834,7 +834,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -853,7 +853,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -872,7 +872,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -891,7 +891,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -910,7 +910,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -929,7 +929,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 500
   running: true
@@ -948,7 +948,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 4000
   running: true
@@ -967,7 +967,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -986,7 +986,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1005,7 +1005,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1024,7 +1024,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1043,7 +1043,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1062,7 +1062,7 @@ spec:
     memory: "80Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1083,7 +1083,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1102,7 +1102,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1121,7 +1121,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1140,7 +1140,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1159,7 +1159,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1178,7 +1178,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1197,7 +1197,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1216,7 +1216,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1235,7 +1235,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1254,7 +1254,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1273,7 +1273,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1292,7 +1292,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1311,7 +1311,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1330,7 +1330,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1349,7 +1349,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1368,7 +1368,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1387,7 +1387,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1406,7 +1406,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1425,7 +1425,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1444,7 +1444,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1463,7 +1463,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1482,7 +1482,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1501,7 +1501,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1520,7 +1520,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1539,7 +1539,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1558,7 +1558,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1577,7 +1577,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1596,7 +1596,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1615,7 +1615,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1634,7 +1634,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1653,7 +1653,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1672,7 +1672,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1691,7 +1691,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1710,7 +1710,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1729,7 +1729,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1748,7 +1748,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1767,7 +1767,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1786,7 +1786,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1805,7 +1805,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1824,7 +1824,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1843,7 +1843,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1862,7 +1862,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1881,7 +1881,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1900,7 +1900,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -1919,7 +1919,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -1938,7 +1938,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1957,7 +1957,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1976,7 +1976,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -1995,7 +1995,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -2014,7 +2014,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2033,7 +2033,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2052,7 +2052,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2071,7 +2071,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2090,7 +2090,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -2109,7 +2109,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2128,7 +2128,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2147,7 +2147,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2166,7 +2166,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2185,7 +2185,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 2000
   running: true
@@ -2204,7 +2204,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2223,7 +2223,7 @@ spec:
     memory: "64Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 800
   running: true
@@ -2244,7 +2244,7 @@ spec:
     memory: "32Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 400
   running: true
@@ -2263,7 +2263,7 @@ spec:
     memory: "32Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 400
   running: true
@@ -2282,7 +2282,7 @@ spec:
     memory: "32Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 400
   running: true
@@ -2303,7 +2303,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2322,7 +2322,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2341,7 +2341,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2360,7 +2360,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2379,7 +2379,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2398,7 +2398,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2417,7 +2417,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2436,7 +2436,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2455,7 +2455,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2474,7 +2474,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2493,7 +2493,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2512,7 +2512,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2531,7 +2531,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2550,7 +2550,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2569,7 +2569,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2588,7 +2588,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2607,7 +2607,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2626,7 +2626,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2645,7 +2645,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2664,7 +2664,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2683,7 +2683,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2702,7 +2702,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2721,7 +2721,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2740,7 +2740,7 @@ spec:
     memory: "16Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 200
   running: true
@@ -2761,7 +2761,7 @@ spec:
     memory: "8Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 50
   running: true
@@ -2780,7 +2780,7 @@ spec:
     memory: "8Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 50
   running: true
@@ -2799,7 +2799,7 @@ spec:
     memory: "8Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 50
   running: true
@@ -2818,7 +2818,7 @@ spec:
     memory: "8Gi"
   utilization:
     cpu: "0.1"
-    memory: "0.54"
+    memory: "0.49"
   migration:
     dirtyRateMbps: 50
   running: true
