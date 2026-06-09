@@ -1049,31 +1049,25 @@ class PodManager:
     def _remove_pod_finalizer(self, pod_name: str) -> bool:
         """Remove the migration finalizer from a pod."""
         try:
-            import json as json_module
-            from kubernetes.client import ApiClient
-            import traceback
-
             pod = self.v1.read_namespaced_pod(name=pod_name, namespace=self.namespace)
             finalizers = pod.metadata.finalizers or []
             logger.info(f"🔍 _remove_pod_finalizer called for pod {pod_name}")
             logger.info(f"   Current finalizers: {finalizers}")
-            logger.info(f"   Call stack:\n{''.join(traceback.format_stack()[-4:-1])}")
 
             if "kubevirt.io/migration-protection" in finalizers:
                 finalizers.remove("kubevirt.io/migration-protection")
-                # Use JSON patch for reliable finalizer removal
+                # JSON Patch is the only reliable way to mutate metadata.finalizers:
+                # strategic merge patch silently ignores empty-list replacements.
+                # call_api() renamed response_type → response_types_map in client v29+.
                 patch = [{"op": "replace", "path": "/metadata/finalizers", "value": finalizers}]
-
-                # Call API directly with correct content type
-                api_client = self.v1.api_client
-                api_client.call_api(
+                self.v1.api_client.call_api(
                     f'/api/v1/namespaces/{self.namespace}/pods/{pod_name}',
                     'PATCH',
                     header_params={'Content-Type': 'application/json-patch+json'},
                     body=patch,
-                    response_type='V1Pod',
+                    response_types_map={'200': 'V1Pod'},
                     auth_settings=['BearerToken'],
-                    _return_http_data_only=True
+                    _return_http_data_only=True,
                 )
                 logger.info(f"✅ Removed finalizer from pod {pod_name}, remaining: {finalizers}")
                 return True
