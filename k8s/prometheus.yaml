@@ -67,7 +67,14 @@ spec:
     requests:
       memory: 400Mi
   enableAdminAPI: false
-  retention: 24h
+  retention: 7d
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
   scrapeInterval: 15s
   evaluationInterval: 15s
 

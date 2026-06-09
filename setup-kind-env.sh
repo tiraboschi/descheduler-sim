@@ -276,6 +276,9 @@ install_prometheus_operator() {
             --namespace monitoring \
             --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
             --set prometheus.prometheusSpec.ruleSelectorNilUsesHelmValues=false \
+            --set prometheus.prometheusSpec.retention=7d \
+            --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes[0]=ReadWriteOnce \
+            --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=10Gi \
             --set prometheus.service.type=NodePort \
             --set prometheus.service.nodePort=30090 \
             --set prometheus-node-exporter.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key=type \
