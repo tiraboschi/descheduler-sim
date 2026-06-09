@@ -330,7 +330,7 @@ data:
             "spec": {
               "display": {
                 "name": "Evictions Summary",
-                "description": "Counts over the selected timeframe. Completed: evictions that finished (regular pods evicted directly + VM migrations that settled). VM Migrations Started: live migrations initiated for virt-launcher pods (background evictions). Failed: eviction errors (non-zero signals a descheduler or API issue). Uses increase() to handle descheduler pod restarts that reset the counters."
+                "description": "Counts over the selected timeframe. Uses sum(increase(counter[$__range])) — increase() is applied per counter series before aggregation so the per-series baseline is correctly subtracted, preventing pre-window historical accumulation from leaking in after a pod restart."
               },
               "plugin": {
                 "kind": "StatChart",
@@ -339,15 +339,15 @@ data:
               "queries": [
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(increase((sum(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"} or vector(0)))[$__range:1m]))", "seriesNameFormat": "Completed"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(sum(increase(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"success\", node=~\"$node\"}[$__range])) or vector(0))", "seriesNameFormat": "Completed"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(increase((sum(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"background\", node=~\"$node\"} or vector(0)))[$__range:1m]))", "seriesNameFormat": "VM Migrations Started"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(sum(increase(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"background\", node=~\"$node\"}[$__range])) or vector(0))", "seriesNameFormat": "VM Migrations Started"}}}
                 },
                 {
                   "kind": "TimeSeriesQuery",
-                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(increase((sum(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"error\", node=~\"$node\"} or vector(0)))[$__range:1m]))", "seriesNameFormat": "Failed"}}}
+                  "spec": {"plugin": {"kind": "PrometheusTimeSeriesQuery", "spec": {"query": "round(sum(increase(descheduler_pods_evicted_total{profile=\"KubeVirtRelieveAndMigrate\", result=\"error\", node=~\"$node\"}[$__range])) or vector(0))", "seriesNameFormat": "Failed"}}}
                 }
               ]
             }
