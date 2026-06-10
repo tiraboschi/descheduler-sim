@@ -507,7 +507,7 @@ build_and_deploy_exporter() {
     kubectl apply -f k8s/metrics-exporter.yaml
 
     info "Waiting for metrics exporter to be ready..."
-    kubectl wait --for=condition=Available deployment/metrics-exporter -n monitoring --timeout=120s
+    kubectl wait --for=condition=Available deployment/metrics-exporter -n monitoring --timeout=240s
 }
 
 deploy_vm_controller() {
