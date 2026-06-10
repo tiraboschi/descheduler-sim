@@ -383,21 +383,38 @@ class ScenarioExecutor:
         logger.info(f"Stopped task generator: {gen_name}")
 
     def _is_in_active_window(self, gen_config: Dict[str, Any]) -> bool:
-        """Check if current simulated time is in an active window."""
+        """Check if current simulated time is in an active window.
+
+        Each window may carry an optional `days` list (e.g. [Mon, Tue, Fri])
+        and supports overnight ranges where end < start (e.g. 22:00–06:00).
+        """
         windows = gen_config.get('schedule', {}).get('activeWindows', [])
         if not windows:
             return True  # No windows = always active
 
         sim_time = self.get_simulated_time()
         current_hm = sim_time.strftime("%H:%M")
+        current_dow = sim_time.weekday()  # 0=Mon … 6=Sun
+
+        _DAY = {'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Sat': 5, 'Sun': 6}
 
         for window in windows:
             start = window.get('start', '00:00')
             end = window.get('end', '23:59')
+            days = window.get('days')  # optional list of short day names
 
-            if start <= current_hm <= end:
-                # TODO: Apply weight to rate
-                return True
+            if days is not None:
+                allowed = [_DAY[d] for d in days if d in _DAY]
+                if current_dow not in allowed:
+                    continue
+
+            # Overnight windows have end < start (e.g. 22:00–06:00)
+            if start <= end:
+                if start <= current_hm <= end:
+                    return True
+            else:
+                if current_hm >= start or current_hm <= end:
+                    return True
 
         return False
 

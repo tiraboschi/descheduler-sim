@@ -1,0 +1,284 @@
+# Week-long Simulation Scenario
+#
+# Models a full 7-day production workload cycle based on customer-reported data:
+#
+# Cluster:      10 nodes, 128c / 2.3 TiB each, 10 Gbps shared network
+# VM fleet:     148 VMs — reuses pilot-vms.yaml and pilot-nodes.yaml
+# VM base util: CPU 10% (absolute idle floor), Memory 49% (off-hours floor)
+#
+# Customer-reported targets:
+#   CPU:    off-peak 20% / business-hours avg 30% / worst-case (spike) 47%
+#   Memory: ~55% cluster-wide (relatively stable)
+#
+# Weekly pattern:
+#   Mon–Fri 10am–6pm  Business-hours load (peak window)
+#   Tuesday            Highest load day — extra generator active
+#   Spikes             1–3 per business day, 10–20% above baseline, 1–3 h
+#   22:00–06:00        Nightly batch jobs (memory-intensive)
+#   Sat–Sun            ~10% lighter than weekday average
+#
+# How the targets are reached (inherits pilot-scenario.yaml layer model):
+#   Layer 0 – VM baseline (pilot-vms.yaml):     cpu=0.10, memory=0.49
+#   Layer 1 – fleet-offpeak-background (24/7):  +11% CPU, +5.5% memory on all VMs
+#              → off-peak cluster: ~20% CPU, ~54% memory
+#   Layer 2 – weekday-biz-hotspot (Mon–Fri 10–18): +36% CPU on hottest node's VMs
+#              → business-hours cluster avg: ~30% CPU (hot node ~57%)
+#   Layer 3 – weekday-biz-spread  (Mon–Fri 10–18): spreads load to 2nd hottest node
+#   Layer 4 – tuesday-boost       (Tue 10–18):  +extra rate on hottest → Tuesday peak
+#   Layer 5 – weekday-spike-injector (Mon–Fri 10–18, every 15 min):
+#              +57% CPU on 2 random nodes → cluster spike ~47%
+#   Layer 6 – overnight-batch     (22:00–06:00 nightly): +24% memory on 3 nodes
+#              → cluster memory max ~68%
+#   Layer 7 – weekend-load        (Sat–Sun 10–18): rate=4 (vs 5 weekday hotspot)
+#              → ~10% less load than weekday business hours
+#
+# Descheduler:  KubeVirtRelieveAndMigrate, AsymmetricHigh thresholds, 5-min interval
+# Migration:    max 5 cluster-wide, max 2 outbound per node
+
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: SimulationScenario
+metadata:
+  name: week-pilot
+  namespace: default
+spec:
+  # 7-day ceiling at real wall-clock time.  Stop the CR early to end sooner.
+  duration: 168h
+  timeScale: 1.0
+
+  # 10 Gbps shared network — same as pilot.
+  networkBandwidthMbps: 10000
+
+  nodeSelectors:
+    # The single most CPU-loaded node — primary hotspot target.
+    hottest-cpu:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+
+    # Top 2 CPU-loaded nodes — secondary spread.
+    top2-cpu:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+      count: 2
+
+    # Most memory-loaded node — overnight batch tracking.
+    hottest-memory:
+      type: dynamic
+      strategy: maxMetric
+      metric: memory_usage
+
+    # Two randomly chosen nodes — spike injection targets.
+    two-random-nodes:
+      type: random
+      count: 2
+
+    # Three randomly chosen nodes — overnight memory batch targets.
+    three-random-nodes:
+      type: random
+      count: 3
+
+    # All KWOK worker nodes — fleet-wide background generator.
+    all-nodes:
+      type: static
+      matchLabels:
+        type: kwok
+
+  taskTypes:
+    # ── Off-peak fleet background ──────────────────────────────────────────
+    # Long-lived tasks that maintain the ~20% off-peak CPU floor.
+    # Same parameters as pilot-scenario.yaml so layer calibration holds.
+    offpeak-background:
+      resources:
+        cpu:    {min: 0.08, max: 0.14, distribution: uniform}
+        memory: {min: 0.04, max: 0.07, distribution: uniform}
+      duration: {min: 3600, max: 7200, distribution: uniform}
+
+    # ── Weekday business-hours load ────────────────────────────────────────
+    # Represents Mon–Fri 10am–6pm activity.  Adds ~10% cluster CPU avg on top
+    # of background, pushing the hot node to ~57%.
+    business-hours:
+      resources:
+        cpu:    {min: 0.15, max: 0.28, distribution: normal, mean: 0.20, stddev: 0.04}
+        memory: {min: 0.02, max: 0.08, distribution: uniform}
+      duration: {min: 1800, max: 5400, mean: 3600, distribution: exponential}
+
+    # ── Intra-day spike ───────────────────────────────────────────────────
+    # 1–3 spikes per business day, each lasting 1–3 hours.
+    # Pushes 2 random nodes to ~78% CPU → cluster spike ~47%.
+    business-spike:
+      resources:
+        cpu:    {min: 0.20, max: 0.40, distribution: uniform}
+        memory: {min: 0.05, max: 0.14, distribution: uniform}
+      duration: {min: 3600, max: 10800}
+
+    # ── Overnight batch / memory-intensive pipeline ────────────────────────
+    # Nightly batch jobs: low CPU, high memory, long duration.
+    # Targets 3 random nodes to create memory hotspots.
+    memory-batch:
+      resources:
+        cpu:    {min: 0.02, max: 0.07, distribution: uniform}
+        memory: {min: 0.12, max: 0.22, distribution: uniform}
+      duration: {min: 1200, max: 5400, mean: 2700, distribution: exponential}
+
+    # ── Weekend workload ───────────────────────────────────────────────────
+    # Similar to business-hours but slightly lower CPU mean so weekend
+    # averages ~10% below weekday peak, matching customer report.
+    weekend-workload:
+      resources:
+        cpu:    {min: 0.12, max: 0.22, distribution: normal, mean: 0.17, stddev: 0.03}
+        memory: {min: 0.02, max: 0.06, distribution: uniform}
+      duration: {min: 1800, max: 5400, mean: 3600, distribution: exponential}
+
+  taskGenerators:
+    # ── Generator 1: fleet-wide off-peak background (24 × 7) ──────────────
+    # Always active.  Rate=8, mean 5400 s → ~144 concurrent tasks at steady
+    # state (Little's law: 8/300 × 5400 = 144).  Raises cluster CPU from
+    # 10% baseline to ~20% off-peak and memory from 49% to ~54%.
+    - name: fleet-offpeak-background
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: all-nodes
+        vmSelection:
+          count: {value: 30}
+          strategy: random
+      taskType: offpeak-background
+      rate: {value: 8}
+
+    # ── Generator 2: weekday business-hours hotspot ───────────────────────
+    # Mon–Fri 10:00–18:00.  Targets the hottest CPU node every 5 minutes.
+    # Heat-and-chase: descheduler migrates VMs off the hot node, the new
+    # hottest node becomes the next target.
+    - name: weekday-biz-hotspot
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+        activeWindows:
+          - days: [Mon, Tue, Wed, Thu, Fri]
+            start: "10:00"
+            end:   "18:00"
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-cpu
+        vmSelection:
+          count: {min: 3, max: 6}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 5}
+
+    # ── Generator 3: weekday secondary spread ─────────────────────────────
+    # Mon–Fri 10:00–18:00.  Adds load to both the hottest and second-hottest
+    # node, creating a broader 2-node imbalance and exercising the per-node
+    # eviction limit (max 2 outbound).
+    - name: weekday-biz-spread
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 7m
+        activeWindows:
+          - days: [Mon, Tue, Wed, Thu, Fri]
+            start: "10:00"
+            end:   "18:00"
+      assignment:
+        strategy: nodeAware
+        nodeSelector: top2-cpu
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 2}
+
+    # ── Generator 4: Tuesday boost ────────────────────────────────────────
+    # Customer reported Tuesday as the highest load day.  This extra generator
+    # adds rate=3 on top of the normal hotspot (effective rate=8 on Tuesdays)
+    # to push the hot node slightly higher and raise the cluster average.
+    - name: tuesday-boost
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+        activeWindows:
+          - days: [Tue]
+            start: "10:00"
+            end:   "18:00"
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-cpu
+        vmSelection:
+          count: {min: 3, max: 6}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 3}
+
+    # ── Generator 5: intra-day spike injector ─────────────────────────────
+    # Mon–Fri 10:00–18:00, fires every 15 minutes → up to ~5 events per day,
+    # each with rate=10 tasks on 2 random nodes.
+    # Rate=10, duration mean 7200 s → ~80 concurrent spike tasks on ~42 VMs:
+    #   +1.9×0.30 ≈ +57% CPU on spike nodes → cluster avg ~47% during spike
+    - name: weekday-spike-injector
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 15m
+        activeWindows:
+          - days: [Mon, Tue, Wed, Thu, Fri]
+            start: "10:00"
+            end:   "18:00"
+      assignment:
+        strategy: nodeAware
+        nodeSelector: two-random-nodes
+        vmSelection:
+          count: {min: 2, max: 5}
+          strategy: random
+      taskType: business-spike
+      rate: {value: 10}
+
+    # ── Generator 6: nightly batch (22:00–06:00 every night) ──────────────
+    # Overnight batch jobs on 3 random nodes.  Overnight window: start > end
+    # so the activeWindows logic wraps across midnight.
+    # Rate=13, duration mean 2700 s → ~117 concurrent tasks / ~90 VMs:
+    #   +0.79×0.17 ≈ +13% memory cluster-wide → cluster memory max ~68%
+    - name: overnight-batch
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+        activeWindows:
+          - start: "22:00"
+            end:   "06:00"
+      assignment:
+        strategy: nodeAware
+        nodeSelector: three-random-nodes
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: memory-batch
+      rate: {value: 13}
+
+    # ── Generator 7: weekend load (Sat–Sun 10:00–18:00) ──────────────────
+    # Reduced business-hours activity on weekends.  Rate=4 (vs 5 weekday
+    # hotspot) with no spread and no tuesday-boost → cluster CPU ~10% lower
+    # than weekday business hours, matching the customer's "~10% less busy"
+    # report.
+    - name: weekend-load
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+        activeWindows:
+          - days: [Sat, Sun]
+            start: "10:00"
+            end:   "18:00"
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-cpu
+        vmSelection:
+          count: {min: 3, max: 5}
+          strategy: random
+      taskType: weekend-workload
+      rate: {value: 4}
