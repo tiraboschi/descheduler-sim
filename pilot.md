@@ -91,10 +91,28 @@ real cluster.
 
 ## When to start
 
-Apply the CR on a **real Monday** so that the generator active windows
-(Mon–Fri business hours, Tue boost, Sat–Sun weekend load) align with real
-wall-clock days.  Prometheus metrics are always stamped with real time, so
-starting on Monday keeps the dashboard readable without any mental offset.
+Generators evaluate their `activeWindows` against the real wall-clock day and
+time at the moment they fire.  Prometheus metrics are also stamped with real
+time, so the dashboard is always self-consistent — what you see is what the
+cluster was doing at that real moment.
+
+The consequence is that the weekly cycle is anchored to the real calendar:
+
+- **Start on a Monday** for a clean Mon → Sun cycle.  All seven generators
+  participate from the first hour: background, business-hours hotspot and
+  spread, Tuesday boost (from day 2), overnight batch each night, and weekend
+  load at the end.
+- **Start mid-week** (e.g. Wednesday noon) and the scenario is still correct —
+  it simply starts mid-cycle.  Business-hours generators fire immediately on a
+  Wednesday afternoon; overnight batch activates that same night; the weekend
+  follows in two days.  What you miss are the Monday ramp-up and the Tuesday
+  peak; those only appear in days 5–6 of the run when the real calendar reaches
+  the following Monday and Tuesday.
+
+**Rule of thumb:** start on a Monday if observing the full weekly pattern
+(especially the Tuesday boost) matters for the evaluation.  Any other start day
+is fine for endurance / stability testing — after 7 days the full cycle will
+have been covered regardless.
 
 ## Customer workload targets
 
@@ -104,6 +122,8 @@ starting on Monday keeps the dashboard readable without any mental offset.
 | Memory cluster-wide | ~54% (stable) | ~55% | ~68% (overnight batch) |
 
 ## Weekly generator schedule
+
+All times are **UTC**.
 
 | Generator | Active window | Node selector | Task type | Rate | Interval |
 |-----------|--------------|---------------|-----------|-----:|---------|
