@@ -252,13 +252,6 @@ class ScenarioExecutor:
         self.running = False
         self.paused = False
 
-        # Optional simulated epoch — lets you anchor the simulated clock to a
-        # specific date/time (e.g. Monday 00:00) regardless of real wall-clock.
-        # If absent, simulated time == real time (correct for timeScale=1.0).
-        sim_start_str = self.spec.get('simulatedStartTime')
-        self.sim_start: datetime = (
-            datetime.fromisoformat(sim_start_str) if sim_start_str else self.start_time
-        )
 
         # Active tasks (VM -> list of active tasks)
         self.active_tasks: Dict[str, List[ActiveTask]] = defaultdict(list)
@@ -280,7 +273,7 @@ class ScenarioExecutor:
         """Get current simulated time."""
         elapsed_real = datetime.now() - self.start_time
         elapsed_sim = elapsed_real * self.time_scale
-        return self.sim_start + elapsed_sim
+        return self.start_time + elapsed_sim
 
     def get_elapsed_simulated_time(self) -> timedelta:
         """Get elapsed simulated time."""

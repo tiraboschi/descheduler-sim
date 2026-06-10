@@ -89,15 +89,12 @@ real cluster.
 | `k8s/pilot-vms.yaml` | Shared — same 148 VMs |
 | `k8s/week-scenario.yaml` | SimulationScenario `week-pilot` |
 
-## Simulated start time
+## When to start
 
-```yaml
-simulatedStartTime: "2026-06-15T00:00:00"  # Monday 00:00
-```
-
-The simulated clock is anchored to this ISO timestamp so the week always starts
-from Monday regardless of the real day when the CR is applied.  Update this to
-the upcoming Monday before each run.
+Apply the CR on a **real Monday** so that the generator active windows
+(Mon–Fri business hours, Tue boost, Sat–Sun weekend load) align with real
+wall-clock days.  Prometheus metrics are always stamped with real time, so
+starting on Monday keeps the dashboard readable without any mental offset.
 
 ## Customer workload targets
 

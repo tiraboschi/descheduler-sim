@@ -45,11 +45,6 @@ spec:
   duration: 168h
   timeScale: 1.0
 
-  # Anchor the simulated clock to a Monday 00:00 so day-of-week generators
-  # always see a full Mon–Sun cycle regardless of when you apply this CR.
-  # Update to the upcoming Monday before each run.
-  simulatedStartTime: "2026-06-15T00:00:00"
-
   # 10 Gbps shared network — same as pilot.
   networkBandwidthMbps: 10000
 
