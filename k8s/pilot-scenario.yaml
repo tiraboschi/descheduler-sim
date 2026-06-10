@@ -62,12 +62,6 @@ spec:
       metric: cpu_usage
       count: 2
 
-    # Most memory-loaded node — for overnight batch and memory-pipeline tasks.
-    hottest-memory:
-      type: dynamic
-      strategy: maxMetric
-      metric: memory_usage
-
     # Two randomly chosen nodes — spike injector targets 2 nodes so the load
     # increase is large enough to register in the cluster-wide average.
     two-random-nodes:
