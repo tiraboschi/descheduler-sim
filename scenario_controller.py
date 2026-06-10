@@ -142,6 +142,7 @@ class NodeSelector:
         """Select nodes dynamically based on metrics."""
         strategy = config.get('strategy')
         metric = config.get('metric', 'cpu_usage')
+        count = int(config.get('count', 1))
 
         # Get all KWOK nodes
         nodes = self.k8s_api.list_node(label_selector="type=kwok")
@@ -158,11 +159,11 @@ class NodeSelector:
             return []
 
         if strategy == 'maxMetric':
-            max_node = max(node_metrics.items(), key=lambda x: x[1])
-            return [max_node[0]]
+            sorted_nodes = sorted(node_metrics.items(), key=lambda x: x[1], reverse=True)
+            return [name for name, _ in sorted_nodes[:count]]
         elif strategy == 'minMetric':
-            min_node = min(node_metrics.items(), key=lambda x: x[1])
-            return [min_node[0]]
+            sorted_nodes = sorted(node_metrics.items(), key=lambda x: x[1])
+            return [name for name, _ in sorted_nodes[:count]]
         elif strategy == 'threshold':
             operator = config.get('operator', '>')
             threshold = float(config.get('value', 0.5))
@@ -191,7 +192,6 @@ class NodeSelector:
 
     def _get_node_metric(self, node_name: str, metric: str, namespace: str) -> Optional[float]:
         """Get current metric value for a node."""
-        # Get all virt-launcher pods on this node
         try:
             pods = self.k8s_api.list_namespaced_pod(
                 namespace=namespace,
@@ -199,22 +199,27 @@ class NodeSelector:
                 field_selector=f"spec.nodeName={node_name}"
             )
 
-            # Sum up resource consumption from pod annotations
-            total_cpu = 0.0
-            total_memory = 0.0
+            # Sum busy cores / busy memory bytes so we get a node-relative load
+            # value that correctly reflects both VM size and utilization.
+            total_busy_cores = 0.0
+            total_busy_memory = 0.0
 
             for pod in pods.items:
                 annotations = pod.metadata.annotations or {}
-                cpu = float(annotations.get('vm.simulation.io/cpu-consumption', 0))
-                memory = float(annotations.get('vm.simulation.io/memory-consumption', 0))
-                total_cpu += cpu
-                total_memory += memory
+                try:
+                    cpu_cores = float(annotations.get('simulation.node-classifier.io/vm-cpu-cores', 0))
+                    cpu_util = float(annotations.get('simulation.node-classifier.io/vm-cpu-utilization', 0))
+                    mem_bytes = float(annotations.get('simulation.node-classifier.io/vm-memory-bytes', 0))
+                    mem_util = float(annotations.get('simulation.node-classifier.io/vm-memory-utilization', 0))
+                    total_busy_cores += cpu_cores * cpu_util
+                    total_busy_memory += mem_bytes * mem_util
+                except (ValueError, KeyError):
+                    continue
 
             if metric == 'cpu_usage':
-                return total_cpu
+                return total_busy_cores
             elif metric == 'memory_usage':
-                return total_memory
-            # TODO: Add support for pressure metrics and descheduler scores
+                return total_busy_memory
 
         except ApiException as e:
             logger.error(f"Error getting metrics for node {node_name}: {e}")
