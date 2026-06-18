@@ -25,6 +25,13 @@ rules:
 - apiGroups: ["simulation.node-classifier.io", "kubevirt.io"]
   resources: ["virtualmachines/status"]
   verbs: ["get", "update", "patch"]
+# Manage VirtualMachineInstance CRs (written by migration controller)
+- apiGroups: ["kubevirt.io"]
+  resources: ["virtualmachineinstances"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["kubevirt.io"]
+  resources: ["virtualmachineinstances/status"]
+  verbs: ["get", "update", "patch"]
 
 ---
 # ClusterRoleBinding for the webhook

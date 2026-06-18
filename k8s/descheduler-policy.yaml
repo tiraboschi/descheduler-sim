@@ -18,6 +18,11 @@ data:
     - name: KubeVirtRelieveAndMigrate
       pluginConfig:
       - args:
+          migrationCooldown: 15m
+          maxMigrationCooldown: 6h
+          migrationHistoryWindow: 24h
+        name: KubevirtMigrationAware
+      - args:
           evictableNamespaces:
             exclude:
             - kube-system
@@ -98,14 +103,16 @@ data:
             - openshift-user-workload-monitoring
             - openshift-virtualization-os-images
             - openshift-vsphere-infra
+          evictionLimits:
+            node: 2          # allow up to 5 evictions from this node per cycle
           metricsUtilization:
             prometheus:
-              query: descheduler:node:linear_amplified_ideal_point_positive_distance:k3:avg1m
+              query: descheduler:node:actuation_priority:p66_5m
             source: Prometheus
           targetThresholds:
-            MetricResource: 10
+            MetricResource: 20
           thresholds:
-            MetricResource: 10
+            MetricResource: 0
           useDeviationThresholds: true
         name: LowNodeUtilization
       - args:
@@ -124,13 +131,15 @@ data:
           disabled: null
           enabled:
           - DefaultEvictor
+          - KubevirtMigrationAware
         preevictionfilter:
           disabled: null
-          enabled: null
+          enabled:
+          - KubevirtMigrationAware
         presort:
           disabled: null
           enabled: null
         sort:
           disabled: null
           enabled: null
-
+          

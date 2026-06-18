@@ -1,0 +1,62 @@
+---
+# Minimal VirtualMachineInstance CRD at kubevirt.io/v1.
+#
+# The KubevirtMigrationAware descheduler plugin watches this resource to
+# detect live-migration state.  It reads:
+#   status.migrationState.startTimestamp  (RFC3339, set when migration begins)
+#   status.migrationState.endTimestamp    (RFC3339, set when migration ends;
+#                                          empty string while in progress)
+#
+# The CRD intentionally defines only the fields the plugin consumes; all
+# other KubeVirt VMI fields are omitted for simulation simplicity.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: virtualmachineinstances.kubevirt.io
+spec:
+  group: kubevirt.io
+  names:
+    kind: VirtualMachineInstance
+    listKind: VirtualMachineInstanceList
+    plural: virtualmachineinstances
+    singular: virtualmachineinstance
+    shortNames:
+    - vmi
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            properties:
+              migrationState:
+                type: object
+                properties:
+                  startTimestamp:
+                    type: string
+                    description: RFC3339 timestamp when the live migration started
+                  endTimestamp:
+                    type: string
+                    description: RFC3339 timestamp when the live migration completed; empty while in progress
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: MigStart
+      type: string
+      description: Time migration started
+      jsonPath: .status.migrationState.startTimestamp
+    - name: MigEnd
+      type: string
+      description: Time migration ended
+      jsonPath: .status.migrationState.endTimestamp
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
