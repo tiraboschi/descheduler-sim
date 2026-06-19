@@ -103,6 +103,7 @@ class ActiveTask:
     memory: float
     end_time: datetime
     description: str = ""
+    prefer_no_eviction: bool = False
 
 
 class NodeSelector:
@@ -263,6 +264,9 @@ class ScenarioExecutor:
 
         # Baseline utilization per VM snapshotted on first task assignment
         self.vm_baselines: Dict[str, Dict[str, float]] = {}
+
+        # VMs currently annotated with prefer-no-eviction
+        self._prefer_no_eviction_vms: set = set()
 
         # Statistics
         self.total_tasks_generated = 0
@@ -433,6 +437,8 @@ class ScenarioExecutor:
 
     def _generate_tasks(self, gen_config: Dict[str, Any]):
         """Generate and assign tasks based on generator configuration."""
+        prefer_no_eviction = gen_config.get('preferNoEviction', False)
+
         # Determine how many tasks to generate
         rate_config = gen_config.get('rate', {'value': 1})
         num_tasks = int(sample_from_distribution(rate_config))
@@ -467,11 +473,16 @@ class ScenarioExecutor:
                 cpu=cpu,
                 memory=memory,
                 end_time=datetime.now() + timedelta(seconds=duration / self.time_scale),
-                description=f"Task from {gen_config.get('name')}"
+                description=f"Task from {gen_config.get('name')}",
+                prefer_no_eviction=prefer_no_eviction,
             )
 
             self.active_tasks[vm_id].append(task)
             self.total_tasks_generated += 1
+
+            if prefer_no_eviction and vm_id not in self._prefer_no_eviction_vms:
+                self._set_prefer_no_eviction(vm_id, True)
+                self._prefer_no_eviction_vms.add(vm_id)
 
             # Update VM utilization immediately
             self._update_vm_utilization(vm_id)
@@ -597,6 +608,41 @@ class ScenarioExecutor:
         except ApiException as e:
             logger.error(f"Failed to update VM {vm_id}: {e}")
 
+    def _get_pod_for_vm(self, vm_id: str) -> Optional[str]:
+        """Get the active pod name for a VM by label selector."""
+        try:
+            pods = self.k8s_api.list_namespaced_pod(
+                namespace=self.namespace,
+                label_selector=f"kubevirt.io/domain={vm_id}",
+            )
+            active = [p for p in pods.items if p.metadata.deletion_timestamp is None]
+            if active:
+                return active[0].metadata.name
+        except ApiException as e:
+            logger.error(f"Failed to find pod for VM {vm_id}: {e}")
+        return None
+
+    def _set_prefer_no_eviction(self, vm_id: str, enabled: bool):
+        """Set or remove the prefer-no-eviction annotation on a VM's pod."""
+        pod_name = self._get_pod_for_vm(vm_id)
+        if not pod_name:
+            logger.warning(f"Cannot set prefer-no-eviction for {vm_id}: no pod found")
+            return
+        try:
+            annotation_key = "descheduler.alpha.kubernetes.io/prefer-no-eviction"
+            if enabled:
+                patch = {"metadata": {"annotations": {annotation_key: "true"}}}
+            else:
+                patch = {"metadata": {"annotations": {annotation_key: None}}}
+            self.k8s_api.patch_namespaced_pod(
+                name=pod_name,
+                namespace=self.namespace,
+                body=patch
+            )
+            logger.info(f"{'Set' if enabled else 'Removed'} prefer-no-eviction on pod {pod_name} (VM {vm_id})")
+        except ApiException as e:
+            logger.error(f"Failed to patch prefer-no-eviction on pod {pod_name}: {e}")
+
     def _cleanup_completed_tasks(self):
         """Remove completed tasks and update VM utilization."""
         now = datetime.now()
@@ -609,6 +655,11 @@ class ScenarioExecutor:
                 # Tasks completed, update utilization
                 self.active_tasks[vm_id] = active
                 self._update_vm_utilization(vm_id)
+
+                if vm_id in self._prefer_no_eviction_vms:
+                    if not any(t.prefer_no_eviction for t in active):
+                        self._set_prefer_no_eviction(vm_id, False)
+                        self._prefer_no_eviction_vms.discard(vm_id)
 
     def _check_timeline_events(self):
         """Check and execute timeline events."""

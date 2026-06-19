@@ -1,0 +1,164 @@
+# Prefer-No-Eviction Simulation Scenario
+#
+# Same cluster/VM fleet as pilot-biz-hours but with preferNoEviction enabled
+# on all spike/load generators.  When a VM receives a load spike, its
+# virt-launcher pod is annotated with:
+#
+#   descheduler.alpha.kubernetes.io/prefer-no-eviction=true
+#
+# The descheduler policy uses noEvictionPolicy: Mandatory, so annotated pods
+# are completely skipped.  Only idle / lightly-loaded VMs are eligible for
+# migration.  The annotation is removed when all spike tasks on the VM expire.
+#
+# Expected behaviour vs. pilot-biz-hours:
+#   - Fewer total evictions (loaded VMs are protected)
+#   - Descheduler migrates only baseline-only VMs to rebalance
+#   - Hot nodes stay hot longer (their VMs can't be moved while loaded)
+#   - Rebalancing happens once spikes decay and annotations are removed
+#
+# Cluster:      10 nodes, 128c / 2.3 TiB each, 10 Gbps shared network
+# VM fleet:     148 VMs (same as pilot-vms.yaml)
+# VM base util: CPU 10%, Memory 49%
+
+apiVersion: simulation.node-classifier.io/v1alpha1
+kind: SimulationScenario
+metadata:
+  name: prefer-no-eviction
+  namespace: default
+spec:
+  duration: 60m
+  timeScale: 1.0
+  networkBandwidthMbps: 10000
+
+  nodeSelectors:
+    hottest-cpu:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+
+    top2-cpu:
+      type: dynamic
+      strategy: maxMetric
+      metric: cpu_usage
+      count: 2
+
+    two-random-nodes:
+      type: random
+      count: 2
+
+    three-random-nodes:
+      type: random
+      count: 3
+
+    all-nodes:
+      type: static
+      matchLabels:
+        type: kwok
+
+  taskTypes:
+    offpeak-background:
+      resources:
+        cpu:    {min: 0.08, max: 0.14, distribution: uniform}
+        memory: {min: 0.04, max: 0.07, distribution: uniform}
+      duration: {min: 3600, max: 7200, distribution: uniform}
+
+    business-hours:
+      resources:
+        cpu:    {min: 0.15, max: 0.28, distribution: normal, mean: 0.20, stddev: 0.04}
+        memory: {min: 0.02, max: 0.08, distribution: uniform}
+      duration: {min: 1800, max: 5400, mean: 3600, distribution: exponential}
+
+    business-spike:
+      resources:
+        cpu:    {min: 0.20, max: 0.40, distribution: uniform}
+        memory: {min: 0.05, max: 0.14, distribution: uniform}
+      duration: {min: 3600, max: 10800}
+
+    memory-batch:
+      resources:
+        cpu:    {min: 0.02, max: 0.07, distribution: uniform}
+        memory: {min: 0.12, max: 0.22, distribution: uniform}
+      duration: {min: 1200, max: 5400, mean: 2700, distribution: exponential}
+
+  taskGenerators:
+    # Fleet-wide off-peak background — NO preferNoEviction.
+    # Baseline load is not a spike; these VMs remain evictable.
+    - name: fleet-offpeak-background
+      enabled: true
+      schedule:
+        type: periodic
+        interval: 5m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: all-nodes
+        vmSelection:
+          count: {value: 30}
+          strategy: random
+      taskType: offpeak-background
+      rate: {value: 8}
+
+    # Business-hours hotspot — preferNoEviction ON.
+    # VMs receiving concentrated business load are protected from eviction.
+    - name: business-hours-hotspot
+      enabled: true
+      preferNoEviction: true
+      schedule:
+        type: periodic
+        interval: 5m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: hottest-cpu
+        vmSelection:
+          count: {min: 3, max: 6}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 5}
+
+    # Secondary spread on top-2 CPU nodes — preferNoEviction ON.
+    - name: business-hours-spread
+      enabled: true
+      preferNoEviction: true
+      schedule:
+        type: periodic
+        interval: 7m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: top2-cpu
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: business-hours
+      rate: {value: 2}
+
+    # Intra-day spike — preferNoEviction ON.
+    # Heavily loaded VMs are protected; descheduler targets idle neighbours.
+    - name: spike-injector
+      enabled: true
+      preferNoEviction: true
+      schedule:
+        type: periodic
+        interval: 15m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: two-random-nodes
+        vmSelection:
+          count: {min: 2, max: 5}
+          strategy: random
+      taskType: business-spike
+      rate: {value: 10}
+
+    # Memory-intensive batch — preferNoEviction ON.
+    - name: memory-pipeline-load
+      enabled: true
+      preferNoEviction: true
+      schedule:
+        type: periodic
+        interval: 5m
+      assignment:
+        strategy: nodeAware
+        nodeSelector: three-random-nodes
+        vmSelection:
+          count: {min: 2, max: 4}
+          strategy: random
+      taskType: memory-batch
+      rate: {value: 13}
